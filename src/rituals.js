@@ -198,17 +198,24 @@ function mechAngle(canvas, god, cb) {
   const [r, g, b] = accentRGB(god);
   let startY = 0;
 
-  const press = (e) => { e.preventDefault(); dragging = true; startY = pointerY(e, canvas); };
+  const press = (e) => {
+    e.preventDefault();
+    dragging = true; startY = pointerY(e, canvas);
+    try { canvas.setPointerCapture(e.pointerId); } catch { /* noop */ } // 把指標綁在畫布上 → 拖曳不會捲動頁面
+  };
   const move = (e) => {
     if (!dragging) return;
+    e.preventDefault(); // 阻止觸控下拉捲動畫面
     const y = pointerY(e, canvas);
     const rect = canvas.getBoundingClientRect();
     target = clamp((y - startY) / (rect.height * 0.6), 0, 1);
   };
-  const release = () => { dragging = false; };
+  const release = (e) => { dragging = false; try { canvas.releasePointerCapture(e.pointerId); } catch { /* noop */ } };
+  // 綁在 canvas 上（搭配 setPointerCapture），不再用 window，避免拖曳外溢成頁面捲動
   canvas.addEventListener('pointerdown', press);
-  window.addEventListener('pointermove', move);
-  window.addEventListener('pointerup', release);
+  canvas.addEventListener('pointermove', move, { passive: false });
+  canvas.addEventListener('pointerup', release);
+  canvas.addEventListener('pointercancel', release);
 
   const stop = engine(canvas, (ctx, w, h, dt) => {
     ctx.clearRect(0, 0, w, h);
@@ -247,8 +254,9 @@ function mechAngle(canvas, god, cb) {
 
   return () => {
     canvas.removeEventListener('pointerdown', press);
-    window.removeEventListener('pointermove', move);
-    window.removeEventListener('pointerup', release);
+    canvas.removeEventListener('pointermove', move);
+    canvas.removeEventListener('pointerup', release);
+    canvas.removeEventListener('pointercancel', release);
     stop();
   };
 }

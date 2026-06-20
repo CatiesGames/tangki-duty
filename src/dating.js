@@ -492,15 +492,17 @@ export function endingFor(target, ctx = {}) {
   const E = DATING_ENDINGS[target.id]; if (!E) return null;
   const aff = ctx.aff ?? 0;
   const matched = ctx.matched ?? false;
-  const hi = aff >= 70; // 好感達「好結局」線
+  const confessed = ctx.confessed ?? false; // 故事聊到位/告白成功 → 走好結局分支
+  const hi = aff >= 70;                      // 好感達「好結局」線
   if (target.type === 'scammer') {
-    if (hi && matched) return E.save || E.love || E.team;      // 你夠罩 → 救他上岸
-    if (aff >= 40) return E.team;                               // 半吊子 → 聯手/灰
-    return E.bitten;                                            // 沒搞定 → 被反咬
+    if (confessed || (hi && matched)) return E.save || E.love || E.team; // 你夠罩 → 救他上岸
+    if (aff >= 40) return E.team;                                        // 半吊子 → 聯手/灰
+    return E.bitten;                                                     // 沒搞定 → 被反咬
   }
   if (target.type === 'golddigger') {
-    return (hi && matched) ? E.won : E.poor;                   // 要好感也要行頭
+    // 拜金型：要好感也要行頭；沒行頭(沒 matched)即使聊到位也是嫌窮跑掉
+    return ((confessed || hi) && matched) ? E.won : E.poor;
   }
-  // sincere：好感為主，行頭加分但非必要
-  return (aff >= 60 || (hi && matched)) ? E.love : E.missed;
+  // sincere：好感為主，行頭加分但非必要。confessed(故事聊到位)直接好結局
+  return (confessed || aff >= 60 || (hi && matched)) ? E.love : E.missed;
 }

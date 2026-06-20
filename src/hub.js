@@ -1488,23 +1488,25 @@ function openChat(id) {
   const d = ds();
   if (d.partners.includes(id)) return openPartnerChat(id); // 交往後（含好結局）：切題無限聊
   if (d.endings[id]) return openDatingEnding(t);          // 壞/灰結局：定格回顧
-  // 沒有待回提問才丟出新話題單元；若整條故事線已聊完 → 觸發結局
+  // 沒有待回提問才丟出新話題單元；故事聊完且好感達標(pushNextPrompt 回 false) → 收好結局
   if (!lastIsOpenPrompt(id)) {
-    if (!pushNextPrompt(t)) return triggerDatingEnding(t);
+    if (!pushNextPrompt(t)) return triggerDatingEnding(t, true);
   }
   renderPursuitChat(t);
 }
 
-/* 丟出「下一個沒聊過的對話單元」當對方提問。回 true=有題可聊；false=故事線聊完（該觸發結局）。
-   依當下 stage 抽不重複的 unit；該 stage 聊完但還沒到 stage3 → 自動往下一 stage（劇情推進）。 */
+/* 丟出「下一個沒聊過的對話單元」當對方提問。回 true=有題可聊；false=好感夠了、故事聊完該收好結局。
+   依當下 stage 抽不重複的 unit；該 stage 聊完往下一 stage 推進。
+   ⚠️ 重點：單元抽完但好感還沒到好結局線時，不會強制壞結局——改成「重洗續聊」，
+   讓玩家能繼續把好感聊上去（壞結局只從『連續冷淡』那條觸發，且有逐句預兆）。 */
 function pushNextPrompt(t) {
   const id = t.id;
   const convo = t.convo || FALLBACK_CONVO;
-  let stage = stageOf(affOf(id));
-  // 從目前 stage 起，往後找還有沒聊過單元的 stage（讓劇情能往後走）
+  const stage = stageOf(affOf(id));
+  // 1) 先找還沒聊過的單元（劇情往後推進）
   for (let st = stage; st <= 3; st++) {
     const units = unitsForStage(convo, st);
-    const picked = pickUnseenObj(id, `s${st}`, units, true); // noRecycle：聊完不重洗
+    const picked = pickUnseenObj(id, `s${st}`, units, true); // noRecycle：先聊沒聊過的
     if (picked) {
       const unit = picked.item;
       pushHist(id, { who: 'them', text: unit.them, openPrompt: true, unitIdx: picked.idx, stageAtAsk: st });
@@ -1512,7 +1514,18 @@ function pushNextPrompt(t) {
       return true;
     }
   }
-  return false; // 四個 stage 的單元全聊完 → 故事走完
+  // 2) 全聊完了：只有「現在收會是好結局」(好感達標、拜金/詐騙還要行頭) 才結束；
+  //    否則重洗續聊，讓玩家繼續把好感聊上去或去備行頭——不突然壞結局。
+  const wouldBeGood = endingFor(t, { aff: affOf(id), matched: tryMatch(t, getSave().owned), confessed: true })?.good;
+  if (wouldBeGood) return false; // → 呼叫端觸發（好）結局
+  const units = unitsForStage(convo, stage);
+  const d = ds(); if (d.seen[id]) d.seen[id][`s${stage}`] = []; // 重置該 stage 的 seen，續聊
+  const picked = pickUnseenObj(id, `s${stage}`, units, true);
+  if (picked) {
+    pushHist(id, { who: 'them', text: picked.item.them, openPrompt: true, unitIdx: picked.idx, stageAtAsk: stage });
+    return true;
+  }
+  return false;
 }
 
 /* 找出目前「待回的那個提問單元」(unitIdx + 當時的 stage)，選項就從這個單元出 → 跟對方問的對得上 */
@@ -1605,10 +1618,10 @@ function pickChatOpt(t, opt, el) {
     // ① 對方先「針對你選的」切題回應
     pushHist(t.id, { who: 'them', text: opt.reply || genericReply(opt) });
     if (opt.replyPic) pushHist(t.id, { who: 'them', text: '', pic: nextSelfie(t) });
-    // ② 太冷淡收場 → 提早壞結局
+    // ② 連續冷淡才收壞結局（有逐句失望預兆，不是無預警）
     if (coldOut) { triggerDatingEnding(t); return; }
-    // ③ 換下一個沒聊過的話題單元；整條故事線聊完 → 觸發結局（好/壞看當下狀態）
-    if (!pushNextPrompt(t)) { triggerDatingEnding(t); return; }
+    // ③ 換下一個話題；故事聊完且好感達標 → 收好結局（好感不夠則 pushNextPrompt 內部重洗續聊，不突然壞）
+    if (!pushNextPrompt(t)) { triggerDatingEnding(t, true); return; }
     renderPursuitChat(t);
   }, delay);
 }
