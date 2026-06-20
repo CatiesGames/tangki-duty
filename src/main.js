@@ -83,6 +83,7 @@ function setPhase(i) {
   $('btn-start').classList.toggle('hidden', i !== 0);
   $('btn-prep-next').classList.toggle('hidden', i !== 1);
   document.body.classList.toggle('on-start', i === 0); // 選神頁隱藏右上統計，留給廟務經營
+  document.body.classList.toggle('on-serve', i === 4); // 執務頁：頂部標題收簡、把空間讓給信眾圖
   if (i === 0) updateShiftCost(); // 選神頁顯示「本班起乩開銷」
 }
 
@@ -1406,4 +1407,21 @@ openHub();
 // 娛樂城贏錢 → 全螢幕金幣雨（hub.js 會呼叫）
 window.__casinoWin = (big) => coinRain(big ? 46 : 22, !!big);
 
-if (import.meta.env?.DEV) { window.__state = state; window.__store = getSave(); }
+if (import.meta.env?.DEV) { window.__state = state; window.__store = getSave(); window.__finishInvoke = finishInvoke; window.__startShift = startShift; }
+
+/* ── 鎖死手機縮放：iOS 捏放手勢、雙擊縮放、雙指捲動都擋掉，畫面全版固定像 App ── */
+(() => {
+  // iOS Safari 的捏放是 gesture 事件（user-scalable=no 擋不掉）
+  ['gesturestart', 'gesturechange', 'gestureend'].forEach((ev) =>
+    document.addEventListener(ev, (e) => e.preventDefault(), { passive: false }));
+  // 雙指 touchmove = 捏放 → 擋掉（單指照常，遊戲互動不受影響）
+  document.addEventListener('touchmove', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+  // 雙擊縮放：320ms 內第二次 tap 擋掉（但放行按鈕/可點元素，避免影響快速連點下注、選項）
+  let lastTap = 0;
+  document.addEventListener('touchend', (e) => {
+    const now = Date.now();
+    const onInteractive = e.target.closest?.('button,a,input,textarea,[role="button"],[data-i],.jd-opt,.cas-chip,.gmb-tier,.god-card');
+    if (now - lastTap < 320 && !onInteractive) e.preventDefault();
+    lastTap = now;
+  }, { passive: false });
+})();
