@@ -9,6 +9,7 @@
 
 import { R, RI } from './content.js';
 import { asset } from './asset.js';
+import { partnerPerks } from './perks.js';
 import {
   bump, getSave, ownItem, owns, persist, spendCash,
 } from './store.js';
@@ -40,7 +41,7 @@ const P = (cat, id, name, price, blurb, desc) => ({
   cat,
   name,
   price,
-  img: `/shop/${IMG_PREFIX[cat] || cat}-${id}.jpg`,
+  img: `/shop/${IMG_PREFIX[cat] || cat}-${id}.webp`,
   blurb,
   desc,
   ironicHelp: helpFor(price),
@@ -871,8 +872,10 @@ export function openShop(containerEl, { onClose } = {}) {
   function cartItems() {
     return PRODUCTS.filter((p) => ui.cart.has(p.id) && !owns(p.id));
   }
+  // Céline・內部骨折價：商店全品項 ×shopMul（預設 1；攻略珠寶世家後 0.1＝一折）
+  function shopMul() { return partnerPerks(getSave().dating?.partners || []).shopMul ?? 1; }
   function cartTotal() {
-    return cartItems().reduce((s, p) => s + p.price, 0);
+    return Math.round(cartItems().reduce((s, p) => s + p.price, 0) * shopMul());
   }
 
   function updateCartBar() {
@@ -1094,7 +1097,7 @@ export function openShop(containerEl, { onClose } = {}) {
     if (!items.length) { toast('這些你都有了，無需重複供奉。', ''); return; }
     co = {
       items,
-      total: items.reduce((s, p) => s + p.price, 0),
+      total: Math.round(items.reduce((s, p) => s + p.price, 0) * shopMul()),
       help: items.reduce((s, p) => s + p.ironicHelp, 0),
       source,
       step: 0, // 0=訂單摘要 1=付款方式 2=信用卡 3=結果
@@ -1157,6 +1160,8 @@ export function openShop(containerEl, { onClose } = {}) {
 
   /* Step 0：訂單摘要 */
   function renderCoSummary(body, foot) {
+    const coFull = co.items.reduce((s, p) => s + p.price, 0); // 原價小計
+    const coDisc = coFull - co.total;                         // 內部價折抵額
     body.innerHTML = `
       <div class="co-card">
         <h4>🛍️ 商品（${co.items.length}）</h4>
@@ -1171,9 +1176,9 @@ export function openShop(containerEl, { onClose } = {}) {
       </div>
       <div class="co-card">
         <h4>🧾 金額明細</h4>
-        <div class="co-line"><span class="t">商品小計</span><span class="v">${money(co.total)}</span></div>
+        <div class="co-line"><span class="t">商品小計</span><span class="v">${money(coFull)}</span></div>
         <div class="co-line free"><span class="t">運費</span><span class="v">免運</span></div>
-        <div class="co-line discount"><span class="t">乩幣折抵</span><span class="v">-${money(0)}</span></div>
+        <div class="co-line discount"><span class="t">${coDisc > 0 ? '💎 珠寶世家內部價' : '乩幣折抵'}</span><span class="v">-${money(coDisc)}</span></div>
         <div class="co-line grand"><span class="t">應付總額</span><span class="v">${money(co.total)}</span></div>
       </div>
       <div class="co-ironic">😇 這筆 ${money(co.total)} 本可幫助 ${co.help.toLocaleString()} 位信眾。但你選擇了自己。</div>

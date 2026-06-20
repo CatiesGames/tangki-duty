@@ -63,7 +63,7 @@ import { CONVOS } from './dating_convo.js';
 export const TARGETS = [
   // ── 夜店／網美圈 ──
   {
-    id: 't-yuki', name: 'Yuki', age: 24, label: '夜店常客', region: '信義區', img: '/dating/date-girl-1.jpg',
+    id: 't-yuki', name: 'Yuki', age: 24, label: '夜店常客', region: '信義區', img: '/dating/date-girl-1.webp',
     type: 'golddigger',
     bio: '週末都泡信義區包廂。停車場那排，我只看引擎蓋上有沒有躍馬。代步車就別開來了，會擋到我的位子。🏎️',
     gate: { test: (o) => ownsAny(o, TIER.carTop), hint: '「躍馬」＝某義大利車廠的標誌（保時捷以上等級）', clue: '她只看「引擎蓋上的標誌」，喜美、Altis 這種等級她連看都不看。' },
@@ -83,7 +83,7 @@ export const TARGETS = [
     },
   },
   {
-    id: 't-anny', name: '安妮', age: 26, label: '微網紅', region: '東區', img: '/dating/date-girl-2.jpg',
+    id: 't-anny', name: '安妮', age: 26, label: '微網紅', region: '東區', img: '/dating/date-girl-2.webp',
     type: 'sincere',
     bio: 'IG 經營美食＋開箱，最近迷上鑑賞時間的厚度。手腕上那點重量，比甜言蜜語誠實。⌚ 拍照要好看喔。',
     gate: { test: (o) => ownsAny(o, TIER.watchMid), hint: '「手腕上的重量」「鑑賞時間」＝一支上得了鏡頭的名錶（勞力士以上）', clue: '她說「手腕上的重量比甜言蜜語誠實」——你得有支拿得出手的錶。' },
@@ -108,7 +108,7 @@ export const TARGETS = [
     },
   },
   {
-    id: 't-rin', name: '凜', age: 22, label: '當紅 Coser', region: '西門町', img: '/dating/date-girl-4.jpg',
+    id: 't-rin', name: '凜', age: 22, label: '當紅 Coser', region: '西門町', img: '/dating/date-girl-4.webp',
     type: 'sincere',
     bio: '出 cos 很燒錢 der。喜歡會喝、懂酒的大人，最好是年份比我還老、要醒很久的那種紅。🍷 別點調酒糊弄我。',
     gate: { test: (o) => ownsAny(o, TIER.wineMid), hint: '「年份比我還老」「要醒很久的紅」＝高檔紅酒，不是調酒（香檳王以上）', clue: '她要「年份比她還老、要醒很久的紅」——超商高粱和便宜威士忌都入不了她眼。' },
@@ -128,12 +128,12 @@ export const TARGETS = [
           { label: '好啦，挹注 3 萬', cost: 30000, goto: 'happy' },
           { label: '先見面再說', end: { good: false, line: '凜：「都不挺我QQ」然後已讀不回。' } },
         ] },
-      happy: { text: '你最好了❤️ 場子結束我私訊穿那套給你看～', pic: '/dating/selfie-t-rin.jpg', end: { good: true, line: '凜成了你的固定對象。她真心待你，並真心地，永遠在募治裝費。' } },
+      happy: { text: '你最好了❤️ 場子結束我私訊穿那套給你看～', pic: '/dating/selfie-t-rin-1.webp', end: { good: true, line: '凜成了你的固定對象。她真心待你，並真心地，永遠在募治裝費。' } },
     },
   },
   // ── 空姐／OL 圈 ──
   {
-    id: 't-tina', name: 'Tina', age: 28, label: '長榮空姐', region: '南港', img: '/dating/date-girl-3.jpg',
+    id: 't-tina', name: 'Tina', age: 28, label: '長榮空姐', region: '南港', img: '/dating/date-girl-3.webp',
     type: 'golddigger',
     bio: '飛遍全世界，落地只想回到有 view 的家。十八層以下、看不到河的，我會幽閉恐懼。🏙️ 別約我去你套房喔。',
     gate: { test: (o) => ownsAny(o, TIER.mansionMid), hint: '「十八層以下會幽閉」「看得到河」＝高樓層河岸景觀宅，小套房不行', clue: '她「十八層以下、看不到河會幽閉恐懼」——你那間小套房她不會來。' },
@@ -148,7 +148,7 @@ export const TARGETS = [
     },
   },
   {
-    id: 't-hana', name: 'Hana', age: 25, label: '日系藥師', region: '中山區', img: '/dating/date-girl-5.jpg', lowkey: true,
+    id: 't-hana', name: 'Hana', age: 25, label: '日系藥師', region: '中山區', img: '/dating/date-girl-5.webp', lowkey: true,
     type: 'sincere',
     bio: '個性慢熟，喜歡有質感的小日子。比起名牌，我更在意一頓好好的飯——但要是真的好的那種喔。🍽️',
     gate: { test: () => true, hint: '她沒有很物質，只要你願意好好請一頓飯', clue: '（這位門檻很低——她要的是誠意，不是行頭。）' },
@@ -174,7 +174,7 @@ export const TARGETS = [
   },
   // ── 健身／陽剛圈 ──
   {
-    id: 't-kevin', name: 'Kevin', age: 30, label: '健身教練', region: '內湖', img: '/dating/date-guy-2.jpg',
+    id: 't-kevin', name: 'Kevin', age: 30, label: '健身教練', region: '內湖', img: '/dating/date-guy-2.webp',
     type: 'golddigger',
     bio: '健身房 PT 第一名💪 看人先看手腕——能扛得起重量、也戴得起重量的男人，才配跟我練雙人。',
     gate: { test: (o) => ownsAny(o, TIER.watchMid), hint: '「戴得起重量」＝手腕上得有支夠份量的名錶', clue: 'Kevin「看人先看手腕」，卡西歐電子錶在他眼裡＝沒在練。' },
@@ -196,7 +196,7 @@ export const TARGETS = [
     },
   },
   {
-    id: 't-leo', name: 'Leo', age: 33, label: '新創 CEO', region: '信義區', img: '/dating/date-guy-1.jpg',
+    id: 't-leo', name: 'Leo', age: 33, label: '新創 CEO', region: '信義區', img: '/dating/date-guy-1.webp',
     type: 'scammer',
     bio: '連續創業家，做過幾個你可能聽過的案子。喜歡有想法、聊得來的人。生活步調快，但對的人我會留時間。☕️ 假日喜歡開車兜風。',
     gate: { test: (o) => ownsAny(o, TIER.carMid), hint: '他生活圈品味不低，欣賞「懂得對自己好」的人——你得開得出像樣的車（賓士以上）', clue: 'Leo 的圈子很講格調，會看你的座駕——你開喜美他大概沒什麼話聊。' },
@@ -225,7 +225,7 @@ export const TARGETS = [
   },
   // ── 名媛／貴婦圈（高名聲解鎖） ──
   {
-    id: 't-coco', name: 'Coco 姐', age: 38, label: '離婚貴婦', region: '天母', img: '/dating/date-girl-7.jpg',
+    id: 't-coco', name: 'Coco 姐', age: 38, label: '離婚貴婦', region: '天母', img: '/dating/date-girl-7.webp',
     type: 'golddigger', repReq: 35,
     bio: '前夫留了房，我留了品味。姐姐看的是檔次——你住的地方，要嘛在天花板那層，要嘛別約我。👑',
     gate: { test: (o) => ownsAny(o, TIER.mansionTop), hint: '「天花板那層」＝豪宅金字塔頂端（別墅／帝寶級）', clue: 'Coco 姐要「住在天花板那層」的人——一般電梯三房她不會看。' },
@@ -245,7 +245,7 @@ export const TARGETS = [
     },
   },
   {
-    id: 't-celine', name: 'Céline', age: 29, label: '珠寶世家', region: '仁愛路', img: '/dating/date-girl-6.jpg',
+    id: 't-celine', name: 'Céline', age: 29, label: '珠寶世家', region: '仁愛路', img: '/dating/date-girl-6.webp',
     type: 'golddigger', repReq: 35,
     bio: '家裡做珠寶的，鴿血紅、滿天星我看太多了。要嘛你比我的櫥窗更亮，要嘛我們沒話聊。💎',
     gate: { test: (o) => ownsAny(o, TIER.jewelTop), hint: '「比我的櫥窗更亮」「鴿血紅／滿天星」＝最頂級的珠寶（鑽戒以上）', clue: 'Céline 把鴿血紅、滿天星當日常——你得拿出真正壓得住場的珠寶。' },
@@ -266,7 +266,7 @@ export const TARGETS = [
   },
   // ── 政商／權貴圈（最高名聲解鎖） ──
   {
-    id: 't-vivian', name: '薇薇安', age: 35, label: '議員特助', region: '中正區', img: '/dating/date-vivian.jpg',
+    id: 't-vivian', name: '薇薇安', age: 35, label: '議員特助', region: '中正區', img: '/dating/date-vivian.webp',
     type: 'scammer', repReq: 60,
     bio: '在政治圈工作，平常很忙、但很享受跟成熟的人聊天。看人很準，喜歡有分寸、做得了事的對象。😊 紅酒、藝文、深夜的對話都喜歡。',
     gate: { test: (o) => ownsAny(o, TIER.watchTop), hint: '她的圈子先敬羅衣後敬人——手上得是拿得出手的頂級名錶（愛彼以上）', clue: '薇薇安見過世面，第一眼會看你的細節——你得戴得起頂級名錶才入得了她的眼。' },
@@ -290,7 +290,7 @@ export const TARGETS = [
     },
   },
   {
-    id: 't-arwen', name: '雅雯', age: 31, label: '財團千金', region: '陽明山', img: '/dating/date-arwen.jpg',
+    id: 't-arwen', name: '雅雯', age: 31, label: '財團千金', region: '陽明山', img: '/dating/date-arwen.webp',
     type: 'sincere', repReq: 60,
     bio: '家裡什麼都有，所以我什麼都不缺——除了一個不為錢靠近我的人。但說真的，能匹配我生活的人，本來就不便宜。',
     gate: { test: (o) => ownsAny(o, TIER.mansionHyper) || ownsAny(o, TIER.carHyper), hint: '「能匹配我生活」＝你的層級得到金字塔最頂（帝寶／杜拜島，或頂級超跑）', clue: '雅雯什麼都不缺——你得是同一個階級的人，她才會把你當「對等」。' },
@@ -313,7 +313,7 @@ export const TARGETS = [
   },
   // ── 清純／幼態系（韓團感、看起來像高中生～大學生） ──
   {
-    id: 't-mio', name: '小米歐', age: 19, label: '清純系大一生', region: '師大', img: '/dating/date-mio.jpg', lowkey: true,
+    id: 't-mio', name: '小米歐', age: 19, label: '清純系大一生', region: '師大', img: '/dating/date-mio.webp', lowkey: true,
     type: 'sincere',
     bio: '剛上大學，還在摸索世界～喜歡奶茶、貼紙、跟很溫柔的人。學長你看起來好可靠喔☺️（其實有點想要那種戴起來會發光的小東西）',
     gate: { test: (o) => has(o, 'jewelry-'), hint: '「戴起來會發光的小東西」＝一件像樣的金飾', clue: '她單純歸單純，但也偷偷期待一件閃閃的小禮物。' },
@@ -327,7 +327,7 @@ export const TARGETS = [
     },
   },
   {
-    id: 't-yuna', name: 'YUNA', age: 18, label: '練習生・韓團系', region: '東區', img: '/dating/date-yuna.jpg',
+    id: 't-yuna', name: 'YUNA', age: 18, label: '練習生・韓團系', region: '東區', img: '/dating/date-yuna.webp',
     type: 'golddigger',
     bio: '當練習生中～夢想出道🎤 幼態臉是我的武器嘿嘿。喜歡會打扮、會帶我去高級地方拍照的歐爸（包包要好看，會入鏡的那種）',
     gate: { test: (o) => ownsAny(o, TIER.carMid) || has(o, 'jewelry-'), hint: '「會帶我去高級地方」「會入鏡」＝你得有像樣的車或行頭撐場', clue: 'YUNA 要的是「拍出來好看」——你得開得出像樣的車、拿得出行頭。' },
@@ -341,7 +341,7 @@ export const TARGETS = [
     },
   },
   {
-    id: 't-shian', name: '林思涵', age: 17, label: '高三生・鄰家妹', region: '永和', img: '/dating/date-shian.jpg', lowkey: true,
+    id: 't-shian', name: '林思涵', age: 17, label: '高三生・鄰家妹', region: '永和', img: '/dating/date-shian.webp', lowkey: true,
     type: 'sincere',
     bio: '高三快考試了，壓力好大🥺 都靠追星跟手搖撐著。喜歡會聽我說話、偶爾請我喝飲料的哥哥（最近好想要一杯要排隊的那種…）',
     gate: { test: () => true, hint: '她要的很簡單——願意聽她說話、請她喝飲料', clue: '（她門檻很低，要的是陪伴和一點點心意。）' },

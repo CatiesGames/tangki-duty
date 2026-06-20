@@ -4,6 +4,7 @@
  */
 
 import { getSave, persist, spendCash } from './store.js';
+import { partnerPerks } from './perks.js';
 
 /* 每項升級：等級上限、價格曲線、每級效果說明。
    price(level) = base * growth^level → 越買越貴，但效果相乘故會回本。 */
@@ -60,14 +61,19 @@ export function priceOf(u, level) {
 
 /* 目前各乘數（給 economy 用） */
 export function multipliers() {
-  const up = getSave().upgrades || {};
+  const save = getSave();
+  const up = save.upgrades || {};
+  // 後宮加持：把所有「好結局伴侶」的開掛加成疊進每班乘數（即時推導 → 老玩家自動生效）
+  const pp = partnerPerks(save.dating?.partners || []);
   return {
-    incenseMult: 1 + (up.incense || 0) * UP_BY_ID.incense.perLevel,
-    repGain: 1 + (up.marketing || 0) * UP_BY_ID.marketing.perLevel,
+    incenseMult: (1 + (up.incense || 0) * UP_BY_ID.incense.perLevel) + pp.incenseAdd,
+    repGain: (1 + (up.marketing || 0) * UP_BY_ID.marketing.perLevel) + pp.repAdd,
     crowdBonus: (up.branches || 0) * UP_BY_ID.branches.perLevel,
-    vipChance: (up.vip || 0) * UP_BY_ID.vip.perLevel,
-    staminaBonus: (up.staff || 0) * UP_BY_ID.staff.perLevel,
-    comboCapBonus: (up.comboCap || 0) * UP_BY_ID.comboCap.perLevel,
+    vipChance: (up.vip || 0) * UP_BY_ID.vip.perLevel + pp.vipAdd,
+    staminaBonus: (up.staff || 0) * UP_BY_ID.staff.perLevel + pp.staminaAdd,
+    comboCapBonus: (up.comboCap || 0) * UP_BY_ID.comboCap.perLevel + pp.comboCapAdd,
+    // 後宮專屬欄位（各系統直接讀 state.mult.perk）
+    perk: pp,
   };
 }
 

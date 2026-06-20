@@ -89,6 +89,9 @@ body.possessed .believer-float.show{opacity:1;transform:translateY(0) scale(var(
 body.invoke-shaking #hud{transform:translate(var(--inv-x),var(--inv-y))}
 #hud header,#hud main,#hud footer,#hud #event-overlay{pointer-events:auto}
 #stage{position:relative;min-height:0;overflow:hidden}
+/* 過長頁面可垂直捲動（按鈕才點得到）；橫向仍鎖、不影響全版固定的觀感 */
+.phase.active.scrollable{overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.phase.active.scrollable>.center-col{justify-content:flex-start;min-height:100%;height:auto;margin-top:auto;margin-bottom:auto}
 
 .hud-top{padding:12px 16px 4px;text-align:center;flex-shrink:0}
 .hud-center{max-width:600px;margin:0 auto}
@@ -138,6 +141,13 @@ body.invoke-shaking #hud{transform:translate(var(--inv-x),var(--inv-y))}
 .shift-cost .sc-ic{font-size:14px}
 .shift-cost b{color:#ffd96a;font-variant-numeric:tabular-nums}
 .shift-cost small{flex-basis:100%;text-align:center;font-size:10px;color:rgba(255,225,190,.5);margin-top:1px}
+/* 本班生效的後宮加持彙總（攻略成功才出現） */
+.shift-perks{display:none;margin:7px auto 0;max-width:min(440px,92vw)}
+.shift-perks.show{display:block}
+.shift-perks .sp-head{font-size:10.5px;letter-spacing:1px;color:#ff9fc4;text-align:center;margin-bottom:4px;text-shadow:0 1px 4px #000}
+.shift-perks .sp-list{display:flex;flex-wrap:wrap;gap:5px;justify-content:center}
+.shift-perks .sp-chip{font-size:10.5px;padding:3px 9px;border-radius:999px;color:#ffe9c2;
+  background:linear-gradient(160deg,rgba(255,90,140,.22),rgba(120,30,60,.2));border:1px solid rgba(255,140,180,.45)}
 /* carousel 佔滿剩餘高度並置中，圖片才不會跟標題隔一大段空白 */
 .carousel{position:relative;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;width:100%}
 .carousel-stage{position:relative;width:100%;max-width:760px;height:100%;perspective:1200px}
@@ -301,6 +311,13 @@ body.possessed .invoke-ring{border-color:var(--gold);box-shadow:0 0 60px var(--g
   animation:tapPulse 1.1s ease-in-out infinite}
 .tap-continue.show{display:block}
 @keyframes tapPulse{50%{opacity:.55}}
+/* 反應後補在選項區的整排「繼續」鈕：金色置中、會呼吸，明確可點，避免被誤判卡住 */
+.reply-btn.continue-btn{text-align:center;color:#fff3d0;font-weight:800;
+  background:linear-gradient(160deg,rgba(255,170,40,.28),rgba(180,70,0,.22));
+  border-color:rgba(255,215,0,.55);box-shadow:0 0 22px rgba(255,170,0,.22);
+  animation:tapPulse 1.15s ease-in-out infinite}
+.reply-btn.continue-btn:hover{transform:none;border-color:var(--gold-l)}
+.reply-btn.continue-btn .rl{text-align:center;opacity:1;color:var(--gold-l)}
 /* 連段 HUD：浮在中央上方 */
 /* 賺乩幣金幣特效 */
 #coin-layer{position:fixed;inset:0;z-index:160;pointer-events:none;overflow:hidden}

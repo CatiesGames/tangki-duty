@@ -12,6 +12,7 @@ import { PRODUCTS, openShop, ownedSummary, productById } from './shop.js';
 import { roster, ENDINGS } from './life.js';
 import { TARGETS, tryMatch, CIRCLE_COLORS, wooedBy, CLINGER_LINES, endingFor } from './dating.js';
 import { upgradeList, buyUpgrade, multipliers } from './upgrades.js';
+import { partnerPerks, activePerks, PERKS } from './perks.js';
 
 let hooks = { onStartShift: null, onBack: null };
 let overlay;
@@ -84,7 +85,7 @@ export function openHub() {
   // 地圖底圖（有才套用，沒有就用漸層手繪底）
   const bg = overlay.querySelector('.map-bg');
   const probe = new Image();
-  const mapUrl = asset('/bg/town-map.jpg');
+  const mapUrl = asset('/bg/town-map.webp');
   probe.onload = () => { bg.style.setProperty('--map-img', `url(${mapUrl})`); bg.classList.add('has-img'); alignPins(); };
   probe.src = mapUrl;
   alignPins();
@@ -167,7 +168,7 @@ function openLoanScreen(msg) {
       <button class="loan-rp" data-repay="${owed}" ${s.cash < 1 ? 'disabled' : ''}>能還多少還多少</button>
     </div>` : '';
   screen(`
-    ${scrBg('/bg/loanshark.jpg')}
+    ${scrBg('/bg/loanshark.webp')}
     <div class="scr-head"><button class="scr-close" data-close>‹ 返回</button><h2>地下錢莊・乩龍當舖</h2><span></span></div>
     <div class="loan-wrap">
       <div class="loan-card">
@@ -252,7 +253,7 @@ function openBelieversScreen() {
       </button>`;
     }).join('');
   screen(`
-    ${scrBg('/bg/merit-hall.jpg')}
+    ${scrBg('/bg/merit-hall.webp')}
     <div class="scr-head"><button class="scr-close" data-close>‹ 返回</button><h2>功德堂</h2><span></span></div>
     <div class="scr-stat">接觸 ${total} 人　·　幫到 ${helped} 人　·　害慘 ${ruined} 人</div>
     <div class="bcard-list">${cards}</div>`, (el) => {
@@ -318,7 +319,7 @@ function openCollectionScreen() {
         <div class="col-cat">${g.items.map((pr) => `<button class="col-item" data-pid="${pr.id}"><div class="col-img" data-emoji="${g.emoji}"><img src="${asset(pr.img)}" onerror="this.parentElement.classList.add('ph');this.remove()"/></div><div class="col-name">${pr.name}</div><div class="col-price">${fmt(pr.price)}</div></button>`).join('')}</div>
       </div>`).join('');
   screen(`
-    ${scrBg('/bg/collection-hall.jpg')}
+    ${scrBg('/bg/collection-hall.webp')}
     <div class="scr-head"><button class="scr-close" data-close>‹ 返回</button><h2>收藏閣</h2><span></span></div>
     <div class="scr-stat">已收藏 ${ownedCount} / ${total} 件　·　共花掉 ${fmt(getSave().stats.lifetimeSpent || 0)}　·　點物品看品鑑</div>
     <div class="col-grid">${body}</div>`, (el) => {
@@ -386,10 +387,10 @@ const CASINO_GAMES = [
 ];
 /* 賭場圖庫：probe 載入成功才套用，否則用漸層/emoji fallback，永不破版 */
 const CASINO_IMG = {
-  hall: '/casino/casino-hall.jpg',
-  fortune: '/casino/scene-fortune.jpg', jiao: '/casino/scene-jiao.jpg', slot: '/casino/scene-slot.jpg', vip: '/casino/scene-vip.jpg',
-  slotSym: (k) => `/casino/slot/sym-${k}.png`, // 老虎機 6 個符號各一張正方置中圖（停下保證置中）
-  jiaoYin: '/casino/jiao-yin.png', jiaoYang: '/casino/jiao-yang.png', // 聖筊陰/陽面（同塊翻面）
+  hall: '/casino/casino-hall.webp',
+  fortune: '/casino/scene-fortune.webp', jiao: '/casino/scene-jiao.webp', slot: '/casino/scene-slot.webp', vip: '/casino/scene-vip.webp',
+  slotSym: (k) => `/casino/slot/sym-${k}.webp`, // 老虎機 6 個符號各一張正方置中圖（停下保證置中）
+  jiaoYin: '/casino/jiao-yin.webp', jiaoYang: '/casino/jiao-yang.webp', // 聖筊陰/陽面（同塊翻面）
 };
 /* 對 <div data-bgimg> / <img data-srcprobe> 做存在性偵測，載到才顯示 */
 function wireCasinoImgs(el) {
@@ -865,42 +866,45 @@ function spawnCasinoSparks(host) {
 /* 各設施的開獎邏輯，回 { payout(含本金), mult, msg } */
 function playCasino(gid, bet) {
   const r = Math.random();
+  // Yuki・莊家內線：勝率 +winAdd、賠率 ×multMul、輸了退 refund 比例本金 → EV 直接翻倍以上
+  const cp = (partnerPerks(getSave().dating?.partners || []).casino) || { winAdd: 0, multMul: 1, refund: 0 };
+  const boost = (m) => (m > 0 ? Math.round(bet * m * cp.multMul) : Math.round(bet * cp.refund)); // 贏→賠率加乘；輸→退本
+  const loseMult = cp.refund > 0 ? cp.refund : 0; // 輸的時候顯示用的「等效倍率」
+  const loseTag = cp.refund > 0 ? '（內線退本）' : '';
   if (gid === 'jiao') {
-    // EV ≈ 1.10（玩家略佔優，但猜錯仍全沒）：猜中 48% ×2.3
-    const win = r < 0.48;
-    return win ? { payout: Math.round(bet * 2.3), mult: 2.3, msg: '🥠 聖筊！神明點頭，猜中翻倍！' } : { payout: 0, mult: 0, msg: '😩 陰筊…神明搖頭，香油上繳天庭。' };
+    const win = r < 0.48 + cp.winAdd;
+    return win ? { payout: boost(2.3), mult: 2.3 * cp.multMul, msg: '🥠 聖筊！神明點頭，猜中翻倍！' } : { payout: boost(0), mult: loseMult, msg: `😩 陰筊…香油上繳天庭。${loseTag}` };
   }
   if (gid === 'slot') {
-    // EV ≈ 1.09：×20@2% / ×5@5% / ×2@22% / 其餘歸零
-    if (r < 0.02) return { payout: bet * 20, mult: 20, msg: '🎰🎰🎰 三個 7 連線 JACKPOT ×20！整條街都聽到鈴聲！' };
-    if (r < 0.07) return { payout: bet * 5, mult: 5, msg: '✨ 三尊財神連線 ×5！手氣正旺！' };
-    if (r < 0.29) return { payout: bet * 2, mult: 2, msg: '🙂 三個同符號 ×2，回本還有賺。' };
-    return { payout: 0, mult: 0, msg: '🎰 銘謝惠顧⋯⋯機台說你誠意不夠。' };
+    const a = cp.winAdd; // 把贏的門檻整體放寬
+    if (r < 0.02 + a * 0.1) return { payout: boost(20), mult: 20 * cp.multMul, msg: '🎰🎰🎰 三個 7 連線 JACKPOT ×20！整條街都聽到鈴聲！' };
+    if (r < 0.07 + a * 0.3) return { payout: boost(5), mult: 5 * cp.multMul, msg: '✨ 三尊財神連線 ×5！手氣正旺！' };
+    if (r < 0.29 + a) return { payout: boost(2), mult: 2 * cp.multMul, msg: '🙂 三個同符號 ×2，回本還有賺。' };
+    return { payout: boost(0), mult: loseMult, msg: `🎰 銘謝惠顧⋯⋯機台說你誠意不夠。${loseTag}` };
   }
   if (gid === 'vip') {
-    // 黑骰問天：你 vs 天公伯各擲三黑骰。你豹子 ×11；莊家豹子(你沒) → 歸零；點數你贏 ×1.9；否則(含平手) → 歸零。
-    // EV ≈ 1.12（玩家略佔優），但 all in 仍常常全賠；×11 豹子給足「一把翻身」爽感。
+    // 黑骰問天：你 vs 天公伯各擲三黑骰。內線時你的點數偷偷加權（更常贏）。
     const d6 = () => 1 + Math.floor(Math.random() * 6);
     const you = [d6(), d6(), d6()];
     const sky = [d6(), d6(), d6()];
     const trip = (d) => d[0] === d[1] && d[1] === d[2];
     const sum = (d) => d[0] + d[1] + d[2];
     const youTrip = trip(you); const skyTrip = trip(sky);
-    const ys = sum(you); const ss = sum(sky);
-    let mult, msg;
-    if (youTrip) { mult = 11; msg = `🎲 豹子 ${you[0]}${you[0]}${you[0]}！通殺天公伯 ×11，一把翻身！`; }
-    else if (skyTrip) { mult = 0; msg = `💀 天公伯擲出豹子 ${sky[0]}${sky[0]}${sky[0]}，你滿盤皆輸。`; }
-    else if (ys > ss) { mult = 1.9; msg = `🤑 你 ${ys} 點壓過天公伯 ${ss} 點，×1.9 得手！`; }
-    else if (ys === ss) { mult = 0; msg = `😐 平手 ${ys} 點，天公伯收走——莊家通吃平手。`; }
-    else { mult = 0; msg = `💀 你 ${ys} 點輸天公伯 ${ss} 點，香油全上繳。`; }
-    return { payout: Math.round(bet * mult), mult, msg, you, sky, youTrip, skyTrip };
+    const ys = sum(you) + Math.round(cp.winAdd * 12); const ss = sum(sky); // 內線：你點數偷偷加碼
+    let mult, msg, payout;
+    if (youTrip) { mult = 11 * cp.multMul; payout = boost(11); msg = `🎲 豹子 ${you[0]}${you[0]}${you[0]}！通殺天公伯 ×11，一把翻身！`; }
+    else if (skyTrip && cp.refund <= 0) { mult = 0; payout = 0; msg = `💀 天公伯擲出豹子 ${sky[0]}${sky[0]}${sky[0]}，你滿盤皆輸。`; }
+    else if (ys > ss) { mult = 1.9 * cp.multMul; payout = boost(1.9); msg = `🤑 你 ${ys} 點壓過天公伯 ${ss} 點，×${(1.9 * cp.multMul).toFixed(1)} 得手！`; }
+    else { mult = loseMult; payout = boost(0); msg = `💀 你 ${ys} 點沒贏過天公伯 ${ss} 點，香油上繳。${loseTag}`; }
+    return { payout, mult, msg, you, sky, youTrip, skyTrip };
   }
   // fortune（轉盤）：依 weight 抽一個固定扇區，結果完全由該扇區決定 → 轉到哪格就是哪格
   const total = WHEEL_SEGS.reduce((sum, sg) => sum + sg.weight, 0);
   let roll = r * total; let segIndex = 0;
   for (let k = 0; k < WHEEL_SEGS.length; k++) { roll -= WHEEL_SEGS[k].weight; if (roll < 0) { segIndex = k; break; } }
   const seg = WHEEL_SEGS[segIndex];
-  return { payout: Math.round(bet * seg.mult), mult: seg.mult, msg: seg.msg, segIndex };
+  const segPayout = seg.mult > 0 ? Math.round(bet * seg.mult * cp.multMul) : boost(0);
+  return { payout: segPayout, mult: seg.mult > 0 ? seg.mult * cp.multMul : loseMult, msg: seg.msg + (seg.mult === 0 ? loseTag : ''), segIndex };
 }
 
 /* ── 廟務經營升級樹 ── */
@@ -975,6 +979,24 @@ const COST_TIERS = {
   party: 500000,     // 包場、辦一個局
   property: 30000000, // 置產綁定（仁愛路置產之類，炫富級）
 };
+/* 把金額修成「人會開口的整數」：依量級取整（萬以上抓到萬/十萬，千級抓千），
+   讓詐騙開的價看起來像對方隨口報的數字，而不是「你現金 ×0.43=164,264」那種一眼看穿的怪數。
+   一律 floor 到整數級距、確保 ≤ 上限（不會喊超過你有的）。 */
+function roundNiceMoney(n, cap) {
+  if (n <= 0) return 0;
+  let step;
+  if (n >= 5_000_000) step = 1_000_000;      // 百萬級 → 抓到百萬
+  else if (n >= 1_000_000) step = 500_000;   // 百萬出頭 → 抓到 50 萬
+  else if (n >= 300_000) step = 100_000;     // 數十萬 → 抓到 10 萬
+  else if (n >= 100_000) step = 50_000;      // 十幾萬 → 抓到 5 萬
+  else if (n >= 30_000) step = 10_000;       // 數萬 → 抓到萬
+  else if (n >= 10_000) step = 5_000;        // 一萬出頭 → 抓到 5 千
+  else step = 1_000;                         // 千級 → 抓到千
+  let r = Math.round(n / step) * step;
+  if (cap != null && r > cap) r = Math.floor(cap / step) * step || cap; // 不超過上限
+  return Math.max(step, r);
+}
+
 /* 解析一個選項的實際花費。回 { amount, isScam }；非花費選項回 amount=0。 */
 function resolveCost(opt, t) {
   if (opt.costPct != null) {
@@ -987,7 +1009,9 @@ function resolveCost(opt, t) {
     const raw = Math.floor(s.cash * pct);
     // 不一眼假：至少要有感（>= 5 萬或你現金的 8%），但不超過你有的
     const floor = Math.min(s.cash, Math.max(50000, Math.floor(s.cash * 0.08)));
-    const amount = Math.max(floor, Math.min(s.cash, raw));
+    const target = Math.max(floor, Math.min(s.cash, raw));
+    // 修成整數級距：對方開口報的是個「漂亮數字」，玩家看不出是按比例算的
+    const amount = roundNiceMoney(target, s.cash);
     return { amount, isScam: true };
   }
   if (opt.costTier) return { amount: COST_TIERS[opt.costTier] || 0, isScam: false };
@@ -1265,11 +1289,14 @@ function mountFriends(host) {
     else if (wooed && accepted) { status = '🔥 對你超主動'; cls = 'cling'; action = `data-cling="${id}"`; dot = '<i class="jd-dot cling"></i>'; }
     else if (accepted) { status = `${STAGE_LABEL[stageOf(aff)]}・好感 ${aff}% ›`; cls = 'live'; action = `data-chat="${id}"`; dot = '<i class="jd-dot"></i>'; }
     else { status = '等待對方接受…'; cls = 'wait'; }
+    // 伴侶（好結局）顯示其加持標籤
+    const perkTag = (partner && PERKS[id]) ? `<div class="jd-fr-perk">${PERKS[id].title}<small>${PERKS[id].blurb}</small></div>` : '';
     return `<button class="jd-fr ${cls}" ${action || 'disabled'}>
       <div class="jd-fr-img"><img src="${asset(t.img)}" onerror="this.parentElement.classList.add('ph')"/>${dot}</div>
       <div class="jd-fr-body">
         <div class="jd-fr-name">${t.name} <small>${t.label}</small></div>
         <div class="jd-fr-status">${status}</div>
+        ${perkTag}
       </div>
     </button>`;
   }).join('');
@@ -1461,14 +1488,14 @@ function pickUnseenObj(id, poolKey, pool, noRecycle = false) {
   return { idx, item: pool[idx] };
 }
 
-/* 自拍照路徑：支援每人多張、越聊越多 → selfie-<id>-N.jpg（輪替）；單張舊檔 selfie-<id>.jpg 仍相容。
+/* 自拍照路徑：支援每人多張、越聊越多 → selfie-<id>-N.webp（輪替）。
    count 由角色 convo.selfieCount 指定（預設 3）。 */
 function nextSelfie(t) {
   const n = (t.convo && t.convo.selfieCount) || 3;
   const d = ds(); d.seen[t.id] ||= {};
   const k = (d.seen[t.id].selfieN || 0) % n + 1;
   d.seen[t.id].selfieN = (d.seen[t.id].selfieN || 0) + 1; persist();
-  return `/dating/selfie-${t.id}-${k}.jpg`;
+  return `/dating/selfie-${t.id}-${k}.webp`;
 }
 
 /* 在聊天記錄尾端插入「輸入中…」三點氣泡，回傳該節點，供之後移除 */
@@ -1535,7 +1562,27 @@ function openUnit(t) {
   if (!prompt) return null;
   const convo = t.convo || FALLBACK_CONVO;
   const units = unitsForStage(convo, prompt.stageAtAsk ?? stageOf(affOf(t.id)));
-  return units[prompt.unitIdx ?? 0] || units[0] || null;
+  const unit = units[prompt.unitIdx ?? 0] || units[0] || null;
+  // 帶出這題的穩定種子（角色+階段+題號），給選項打亂用 → 同一題順序固定、不同題不同
+  return unit ? { ...unit, _seed: `${t.id}|${prompt.stageAtAsk ?? 0}|${prompt.unitIdx ?? 0}` } : null;
+}
+
+/* 字串雜湊（穩定）→ 給「種子洗牌」用，讓選項順序固定但不一眼看出哪個最佳 */
+function hashStr(str) {
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return h >>> 0;
+}
+/* 用種子做穩定洗牌（Fisher–Yates + 線性同餘亂數）：同 seed 永遠同順序。 */
+function seededShuffle(arr, seed) {
+  const a = [...arr];
+  let r = hashStr(String(seed)) || 1;
+  for (let i = a.length - 1; i > 0; i--) {
+    r = (Math.imul(r, 1103515245) + 12345) >>> 0;
+    const j = r % (i + 1);
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
 }
 
 /* 追求階段聊天畫面（讀持久化歷史；選項＝目前待回單元的 opts，所以隨對方話題變化、接得上） */
@@ -1546,7 +1593,9 @@ function renderPursuitChat(t) {
   const bubbles = hist.map((m) => chatBubble(t, m)).join('');
   const unit = openUnit(t);
 
-  let opts = ((unit && unit.opts) || []).map((o, i) => ({ ...o, _i: i }));
+  // 選項用「種子洗牌」打亂順序：最佳答案不再固定在第一個，玩家得真的讀完每個選項再判斷
+  //（同一題順序固定、不會每次重繪就跳動；告白/鎖定那顆是特殊動作，永遠擺最後）
+  let opts = seededShuffle((unit && unit.opts) || [], unit?._seed || t.id).map((o) => ({ ...o }));
   const canConfess = aff >= 100 && tryMatch(t, s.owned);
   if (stage >= 3) {
     if (canConfess) opts.push({ label: '❤ 跟你告白：在一起吧', confess: true });
@@ -1586,6 +1635,13 @@ function pickChatOpt(t, opt, el) {
   if (opt.locked) return;
   const c = resolveCost(opt, t);
   if (c.amount > 0) { if (s.cash < c.amount) return; s.cash -= c.amount; if (c.isScam) d.scamAsk[t.id] = (d.scamAsk[t.id] || 0) + 1; }
+  // Leo・反向收割：被詐騙花掉的錢，不但全退、還倒賺一筆（你也學會割韭菜了）
+  const pp = partnerPerks(d.partners || []);
+  if (c.isScam && c.amount > 0 && pp.scamRefund > 0) {
+    const back = Math.round(c.amount * pp.scamRefund);
+    s.cash += back;
+    pushHist(t.id, { who: 'them', text: `（你嘴上應了，轉頭用 Leo 教你的手法把這 乩幣$${c.amount.toLocaleString()} 連本帶利 乩幣$${back.toLocaleString()} 賺了回來——薑是老的辣。）` });
+  }
   if (opt.gift && !opt.gift.test(s.owned)) return;
 
   // 標記上一題已回，把你的回覆寫進歷史
@@ -1633,6 +1689,15 @@ function pickChatOpt(t, opt, el) {
 }
 
 /* 告白成功：正式在一起，仍可繼續日常聊天 */
+/* 加持卡（攻略成功時亮出對方給你的開掛加成）。非好結局對象回空字串。 */
+function perkCard(id) {
+  const p = PERKS[id]; if (!p) return '';
+  return `<div class="perk-card">
+    <div class="perk-head">🎁 獲得加持・${p.title}</div>
+    <div class="perk-blurb">${p.blurb}</div>
+  </div>`;
+}
+
 function confessSuccess(t) {
   const d = ds(); const s = getSave();
   if (!d.partners.includes(t.id)) d.partners.push(t.id);
@@ -1643,12 +1708,16 @@ function confessSuccess(t) {
   d.history[t.id] = [];
   if (d.seen[t.id]) d.seen[t.id].pchat = [];
   pushHist(t.id, { who: 'them', text: (t.convo?.confessLine) || '好…我願意！我們在一起吧❤️', pic: nextSelfie(t) });
+  // 交往當下：對方「自然地」說出他/她能幫你什麼（加持台詞）→ 接著一張加持卡
+  const perk = PERKS[t.id];
+  if (perk) pushHist(t.id, { who: 'them', text: perk.line });
   const bubbles = histOf(t.id).map((m) => chatBubble(t, m)).join('');
   screen(`
     <div class="jd-app chat">
       <div class="jd-bar"><button class="scr-close" data-close-chat>‹</button><div class="jd-chat-head"><img src="${asset(t.img)}" onerror="this.style.display='none'"/><div><b>${t.name}</b><span>❤ 交往中</span></div></div><span></span></div>
       <div class="jd-chatlog">${bubbles}</div>
       <div class="jd-end good">💘 你和 ${t.name} 在一起了！（之後仍能在好友清單點進來聊）</div>
+      ${perkCard(t.id)}
       <div class="jd-opts"><button class="jd-opt" data-back-fr>回好友清單</button><button class="jd-opt confess" data-keep>繼續聊</button></div>
     </div>`, (el) => {
     wireSelfies(el);
@@ -1680,6 +1749,7 @@ function openDatingEnding(t) {
         <div class="jd-end-title">${e.label}</div>
         <div class="jd-end-desc">${e.desc}</div>
       </div>
+      ${e.good ? perkCard(t.id) : ''}
       <div class="jd-opts">
         <button class="jd-opt" data-back-fr>回好友清單</button>
         <button class="jd-opt" data-endings>看所有結局 ›</button>
@@ -2454,6 +2524,15 @@ function injectStyles() {
   .jd-fr.ok .jd-fr-status{color:#7dffb8}
   .jd-fr.gone .jd-fr-status{color:rgba(255,201,220,.5)}
   .jd-fr.cling .jd-fr-status{color:#ff8a4d;font-weight:700}
+  /* 伴侶卡上的加持標籤 */
+  .jd-fr-perk{margin-top:5px;font-size:11px;font-weight:800;color:#ffd96a;line-height:1.4}
+  .jd-fr-perk small{display:block;font-size:10px;font-weight:400;color:rgba(255,228,190,.66);margin-top:1px}
+  /* 攻略成功時亮出的加持卡 */
+  .perk-card{flex:0 0 auto;margin:6px 10px;padding:13px 15px;border-radius:16px;text-align:center;
+    background:linear-gradient(165deg,rgba(70,30,12,.95),rgba(30,12,6,.96));border:1px solid rgba(255,180,70,.55);
+    box-shadow:0 6px 26px rgba(255,150,40,.22)}
+  .perk-card .perk-head{font-size:14px;font-weight:900;color:#ffd96a;letter-spacing:.5px}
+  .perk-card .perk-blurb{font-size:12px;line-height:1.6;color:rgba(255,236,206,.92);margin-top:5px}
   /* 黏人聊天視覺：更躁、更暖 */
   .jd-app.chat.cling{background:linear-gradient(180deg,#1c0a08,#0a0407)}
   .jd-app.chat.cling .jd-chat-head b{color:#ff8a4d}

@@ -19,6 +19,7 @@ import {
 } from './economy.js';
 import { applyChoice, initLife, rollRevisit } from './life.js';
 import { multipliers } from './upgrades.js';
+import { activePerks } from './perks.js';
 import { passiveOf, activesOf } from './skills.js';
 import { initHub, openHub, openUpgradeScreen } from './hub.js';
 import {
@@ -75,6 +76,9 @@ const state = {
 
 let shake = null;
 
+// ph-invoke(3)/ph-serve(4) 是「鋪滿一頁、剛好 fit」的舞台，永遠不捲；其餘頁過長時才開放垂直捲動
+const NO_SCROLL_PHASES = new Set([3, 4]);
+
 function setPhase(i) {
   state.phase = i;
   phases.forEach((p, idx) => $(p).classList.toggle('active', idx === i));
@@ -85,6 +89,23 @@ function setPhase(i) {
   document.body.classList.toggle('on-start', i === 0); // 選神頁隱藏右上統計，留給廟務經營
   document.body.classList.toggle('on-serve', i === 4); // 執務頁：頂部標題收簡、把空間讓給信眾圖
   if (i === 0) updateShiftCost(); // 選神頁顯示「本班起乩開銷」
+  refreshScroll(); // 內容比畫面高時開放垂直捲動，避免下方按鈕點不到
+}
+
+/* 過長頁面才開放垂直捲動：量目前 active 頁內容是否超過可視高度，是就掛 .scrollable。
+   舞台型頁（請神/執務）不捲。內容變動或視窗縮放後可再呼叫一次。 */
+function refreshScroll() {
+  const el = document.querySelector('.phase.active');
+  if (!el) return;
+  const idx = phases.indexOf(el.id);
+  if (NO_SCROLL_PHASES.has(idx)) { el.classList.remove('scrollable'); return; }
+  // 先量「不捲」時的自然高度，再決定要不要開捲動
+  el.classList.remove('scrollable');
+  requestAnimationFrame(() => {
+    if (!el.classList.contains('active')) return;
+    const overflowing = el.scrollHeight > el.clientHeight + 4;
+    el.classList.toggle('scrollable', overflowing);
+  });
 }
 
 /* 選神頁的「本班起乩開銷」提示：退駕結算時會從香火扣這筆固定開銷（隨名聲/天數成長） */
@@ -93,6 +114,17 @@ function updateShiftCost() {
   const sv = getSave();
   const oh = Math.round(shiftOverhead(sv.rep, sv.day));
   el.innerHTML = `<span class="sc-ic">🪔</span>本班起乩開銷 <b>約 乩幣$${oh.toLocaleString()}</b><small>退駕結算時從香火扣（含廟租、油錢、人事）</small>`;
+  updateShiftPerks();
+}
+
+/* 選神頁彙總「本班生效中的後宮加持」（攻略成功的伴侶提供，永久且可疊加） */
+function updateShiftPerks() {
+  const el = $('shift-perks'); if (!el) return;
+  const perks = activePerks(getSave().dating?.partners || []);
+  if (!perks.length) { el.innerHTML = ''; el.classList.remove('show'); return; }
+  el.classList.add('show');
+  el.innerHTML = `<div class="sp-head">💞 後宮加持・生效中 ${perks.length}</div>`
+    + `<div class="sp-list">${perks.map((p) => `<span class="sp-chip" title="${p.blurb}">${p.title}</span>`).join('')}</div>`;
 }
 
 function vibrate(ms = 30) { if (navigator.vibrate) navigator.vibrate(ms); }
@@ -191,7 +223,8 @@ function bindCarouselSwipe() {
   const track = $('god-grid');
   if (track._swipeBound) return;
   track._swipeBound = true;
-  window.addEventListener('resize', () => { if (state.phase === 0) layoutCarousel(); });
+  window.addEventListener('resize', () => { if (state.phase === 0) layoutCarousel(); refreshScroll(); });
+  window.addEventListener('orientationchange', () => setTimeout(refreshScroll, 200));
   let x0 = 0; let active = false;
   track.addEventListener('pointerdown', (e) => { active = true; x0 = e.clientX; });
   window.addEventListener('pointerup', (e) => {
@@ -281,6 +314,7 @@ function renderPrep() {
     tile.addEventListener('click', () => openPrepGame(g.prep.find((p) => p.id === tile.dataset.prep), tile));
   });
   checkPrep();
+  refreshScroll();
 }
 
 function openPrepGame(item, tile) {
@@ -609,7 +643,7 @@ function castSkill(i) {
   if (a.kind === 'nextAnswerMult') { state.skill.nextMult = Math.max(state.skill.nextMult, a.value); toast = `${a.name}！下一筆香火 ×${a.value}`; }
   else if (a.kind === 'allInNext') { state.skill.nextMult = Math.max(state.skill.nextMult, a.value); state.skill._allInDrain = a.value2; toast = `${a.name}！下一筆 ×${a.value}，但元神將大失`; }
   else if (a.kind === 'nextCrit') { state.skill.critNext = a.value; toast = `${a.name}！下一筆必爆 ×${a.value}`; }
-  else if (a.kind === 'refundStamina') { state.stable = clamp(state.stable + a.value, 0, state.stableMax || 100); toast = `${a.name}！回復 ${a.value} 點元神`; updateMeters(); }
+  else if (a.kind === 'refundStamina') { state.stable = clampStable(state.stable + a.value); toast = `${a.name}！回復 ${a.value} 點元神`; updateMeters(); }
   else if (a.kind === 'calm') { state.skill.calm = true; toast = `${a.name}！下一題滿意度不會掉`; }
   else if (a.kind === 'comboLock') { state.skill.comboLock = true; toast = `${a.name}！本班連段不再中斷`; }
   else if (a.kind === 'repNext') { state.repBonus = (state.repBonus || 0) + (a.value || 2); toast = `${a.name}！本班名聲 +${a.value || 2}`; }
@@ -637,6 +671,8 @@ function updateMeters() {
   $('mb-stable').classList.toggle('low', state.stable < 35);
 }
 function clamp(v) { return Math.max(0, Math.min(100, v)); }
+// 元神專用 clamp：上限是 state.stableMax（會被 staff 升級 / Hana 加持拉高到 >100）
+function clampStable(v) { return Math.max(0, Math.min(state.stableMax || 100, v)); }
 
 /* 帶來新的信眾（stage 0） */
 function nextRound() {
@@ -734,25 +770,33 @@ function pickReply(opt, btn) {
 
   const e = opt.effects;
   const passive = passiveOf(state.god.id);
+  const perk = state.mult.perk || {}; // 後宮加持
   const isGood = opt.tags.includes('honest');
+  // 林思涵「嘴甜文昌」：唬爛升級成好牌——會推進連段、還算進香火
+  const bullPower = perk.bullPower && opt.tags.includes('bull');
+  const countsAsGood = isGood || bullPower;
   // 坑錢(scam) 會中斷 combo；唬爛(bull) 是省力安全牌，不推進也不中斷
   const breaksCombo = opt.tags.includes('scam') && !opt.keepCombo;
 
   // ── combo：好答累積、坑錢歸零；唬爛保留現狀（兩派拉扯＋安全牌）──
-  if (isGood) {
+  if (countsAsGood) {
     const rate = passive.comboRate || 1;
-    state.combo += rate >= 1.5 ? 2 : 1; // 三太子衝更快
+    state.combo += (rate >= 1.5 ? 2 : 1) + (perk.comboRateAdd || 0); // 三太子/Kevin 衝更快
   } else if (breaksCombo && !state.skill.comboLock) {
     state.combo = 0;
   } // 唬爛(keepCombo) 或 連段鎖(comboLock) → combo 不變
   const comboMult = comboMultiplier(state.combo, state.mult.comboCapBonus || 0);
 
   // ── 多乘數相乘的香火 ──
+  // 唬爛被「嘴甜文昌」加持時，補一份香火點數（原本 bull 收入低）
+  if (bullPower && (e.incense || 0) < 3) e.incense = 3;
   const godMult = (passive.incenseMult || 1) * (state.skill.nextMult || 1);
-  // 技能「下一筆必爆」：用 chance:1 的 crit 覆蓋；否則沿用神明被動方差
+  // 技能「下一筆必爆」最優先；其次後宮 YUNA 常駐暴擊；再來神明被動方差
   const crit = state.skill.critNext > 0
     ? { chance: 1, mult: state.skill.critNext }
-    : (passive.variance ? { chance: passive.critChance, mult: passive.critMult } : null);
+    : (perk.critChance > 0
+      ? { chance: perk.critChance, mult: Math.max(perk.critMult || 1, passive.critMult || 1) }
+      : (passive.variance ? { chance: passive.critChance, mult: passive.critMult } : null));
   const res = incenseGain(e.incense || 0, {
     rep: getSave().rep,
     incenseMult: state.mult.incenseMult || 1,
@@ -773,13 +817,16 @@ function pickReply(opt, btn) {
   const faithMul = passive.faithPenalty || 1; // 王爺滿意更難拉
   // 定神(calm)：本題若滿意度會掉，擋掉這次下降（正向加成照常）
   let faithDelta = (e.faith || 0) * 6 * (e.faith > 0 ? faithMul : 1);
+  if (faithDelta > 0) faithDelta *= (perk.faithGainMul || 1); // 凜・神級應援：滿意正成長加倍
   if (state.skill.calm && faithDelta < 0) faithDelta = 0;
   state.skill.calm = false;
   state.faith = clamp(state.faith + faithDelta);
+  if (perk.faithFloor) state.faith = Math.max(state.faith, perk.faithFloor); // 滿意度地板：跌不破
   const drain = (state.skill.drunk ? 3 : 1) * (passive.staminaDrain || 1);
   state.skill.drunk = false;
   const allIn = state.skill._allInDrain || 0; state.skill._allInDrain = 0; // 大招額外耗元神
-  state.stable = clamp(state.stable + (e.stable || 0) * 5 - RI(1, 3) * drain - allIn);
+  // Hana・仙丹：每答回元神，抵銷甚至倒灌耗損 → 元神永動
+  state.stable = clampStable(state.stable + (e.stable || 0) * 5 - RI(1, 3) * drain - allIn + (perk.staminaRegen || 0));
   updateComboHud();
 
   state.score.persona[opt.persona] += 1;
@@ -867,19 +914,36 @@ function showTycoonWindfall(win, done) {
   try { window.__casinoWin?.(big); } catch { /* noop */ }
 }
 
-/* 在執務區顯示「點一下繼續」並等待點擊；點了才呼叫 cb */
+/* 在執務區顯示「點一下繼續」並等待點擊；點了才呼叫 cb。
+   ⚠️ 為什麼這樣寫：信眾反應後選項會清空，舊版只在底部放一條小提示，
+   手機上常被誤以為卡住。改成「在原本選項位置補一顆明顯的整排繼續鈕」，
+   點該鈕、底部提示、或畫面任一處皆可推進，確保一定點得到。 */
 function waitTap(cb) {
+  let done = false;
   const hint = $('tap-continue');
-  if (!hint) { setTimeout(cb, 1400); return; }
-  hint.classList.add('show');
+  const grid = $('reply-grid');
+  // 在選項區放一顆顯眼的整排「繼續」鈕（選項剛被清空，這裡正是手指預期的位置）
+  let contBtn = null;
+  if (grid) {
+    grid.innerHTML = '';
+    contBtn = document.createElement('button');
+    contBtn.className = 'reply-btn continue-btn';
+    contBtn.innerHTML = '<span class="rl">▸ 點此繼續</span>聽聽信眾怎麼說 ⋯⋯';
+    grid.appendChild(contBtn);
+  }
+  if (hint) hint.classList.add('show');
+
   const go = (e) => {
+    if (done) return;
+    done = true;
     e?.stopPropagation();
-    hint.classList.remove('show');
+    if (hint) hint.classList.remove('show');
     document.removeEventListener('pointerdown', go, true);
     cb();
   };
-  // 給打字機一點時間再開放點擊，避免手滑略過
-  setTimeout(() => document.addEventListener('pointerdown', go, true), 350);
+  // 繼續鈕可立即點；整頁點擊給打字機一點時間再開放，避免手滑略過
+  contBtn?.addEventListener('click', go);
+  setTimeout(() => { if (!done) document.addEventListener('pointerdown', go, true); }, 350);
 }
 
 function showReplyFx(opt) {
@@ -995,7 +1059,7 @@ function maybeChainEvent(done) {
       title: '🍅 信眾當場翻臉',
       body: `${who}覺得你剛才那番「${lastTopic}」的指點根本在敷衍他，越想越不對，當眾拍桌：「你這什麼神棍！」現場信眾的眼神都涼了。`,
       opts: [
-        { t: '霸氣壓場（元神 -）', primary: true, fn: () => { state.stable = clamp(state.stable - RI(8, 16)); logEvent('壓場安撫', 0, 0); state.faith = clamp(state.faith + 10); } },
+        { t: '霸氣壓場（元神 -）', primary: true, fn: () => { state.stable = clampStable(state.stable - RI(8, 16)); logEvent('壓場安撫', 0, 0); state.faith = clamp(state.faith + 10); } },
         { t: '退香油息事（香火 -）', fn: () => { logEvent('退香油息事', -RI(400, 900)); state.faith = clamp(state.faith + 18); } },
       ],
     }, done);
@@ -1020,12 +1084,16 @@ function maybeChainEvent(done) {
   done();
 }
 
+/* 小米歐・小太陽運：開掛時命運卡擲骰永遠回 0 → 一律落在「好結果」分支。
+   未攻略時就是普通 Math.random()。 */
+function luckyRandom() { return (state.mult?.perk?.chanceLuck) ? 0 : Math.random(); }
+
 /* 機會命運事件 — 像大富翁的命運卡：選一個動作，結果顯著且不保證好 */
 const CHANCE_EVENTS = [
   {
     title: '📸 網美求合照', body: (n) => `${n}說要幫廟「衝聲量」，請你合照發限動。鏡頭一架，全場都在看你怎麼回應。`,
     opts: [
-      { t: '盛裝合照、給她最大版位', primary: true, roll() { return Math.random() < 0.62
+      { t: '盛裝合照、給她最大版位', primary: true, roll() { return luckyRandom() < 0.62
         ? { msg: '限動爆紅！新粉湧入，香火與名聲齊漲。', inc: RI(800, 1600), rep: 5 }
         : { msg: '她拍完只標自己沒標廟。沒蹭到，但你帥照也被瘋傳，小賺。', inc: RI(200, 500), rep: -1 }; } },
       { t: '冷處理、繼續辦正事', roll() { return { msg: '沒蹭到流量，但專心服務信眾，小有香火。', inc: RI(150, 400), rep: 1 }; } },
@@ -1034,7 +1102,7 @@ const CHANCE_EVENTS = [
   {
     title: '🎁 神秘金主遞紅包', body: (n) => `一位西裝筆挺的大哥透過${n}遞來一個厚紅包，說「師父幫個忙，懂的」。沒說是什麼忙。`,
     opts: [
-      { t: '收下，不問', primary: true, roll() { return Math.random() < 0.65
+      { t: '收下，不問', primary: true, roll() { return luckyRandom() < 0.65
         ? { msg: '紅包很厚，香火大進。至於那個「忙」⋯⋯之後再說。', inc: RI(1800, 3400), rep: -1 }
         : { msg: '原來是要你掛名站台，麻煩了一下，但紅包照收。', inc: RI(800, 1500), rep: -5 }; } },
       { t: '婉拒，這種錢燙手', roll() { return { msg: '清譽要緊，名聲微漲。', inc: 0, rep: 3 }; } },
@@ -1043,7 +1111,7 @@ const CHANCE_EVENTS = [
   {
     title: '📺 地方新聞要來拍', body: () => '記者想做「靈驗神壇」專題。鏡頭是雙面刃，可以封神，也可以翻車。',
     opts: [
-      { t: '大方受訪、show 出排場', primary: true, roll() { return Math.random() < 0.6
+      { t: '大方受訪、show 出排場', primary: true, roll() { return luckyRandom() < 0.6
         ? { msg: '報導爆紅，「全國最靈」上熱搜，香火與名聲齊飛！', inc: RI(1000, 2000), rep: 9 }
         : { msg: '記者拍到你滑手機等收工，被酸了一下，但版面還是有露出。', inc: RI(200, 500), rep: -4 }; } },
       { t: '低調謝絕', roll() { return { msg: '少了曝光，但穩穩服務香客，小有進帳。', inc: RI(150, 400), rep: 1 }; } },
@@ -1052,7 +1120,7 @@ const CHANCE_EVENTS = [
   {
     title: '🛕 隔壁宮來踢館', body: () => '隔壁「天威宮」放話說你是假乩，約你公開鬥法比靈驗。輸了難看，贏了名震四方。',
     opts: [
-      { t: '接戰！當場起乩給他看', primary: true, roll() { return Math.random() < 0.6
+      { t: '接戰！當場起乩給他看', primary: true, roll() { return luckyRandom() < 0.6
         ? { msg: '你一個倒栽蔥配狼牙棒，全場跪服，對手摸摸鼻子走人。名聲大漲！', inc: RI(600, 1200), rep: 11 }
         : { msg: '你抖到一半閃到腰，有點糗，但敢接戰這份膽識鄉民反而挺你。', inc: 0, rep: -4 }; } },
       { t: '不理他，清者自清', roll() { return { msg: '沒接招，但你淡定的氣度也圈了一波粉。', inc: 0, rep: 2 }; } },
@@ -1061,7 +1129,7 @@ const CHANCE_EVENTS = [
   {
     title: '🤲 香客掉了錢包', body: (n) => `${n}走後，神桌底下有個鼓鼓的錢包，裡面厚厚一疊，沒人看到。`,
     opts: [
-      { t: '招領歸還失主', primary: true, roll() { return Math.random() < 0.7
+      { t: '招領歸還失主', primary: true, roll() { return luckyRandom() < 0.7
         ? { msg: '失主感激涕零，到處說你德高望重，名聲大漲、還包了謝禮。', inc: RI(400, 900), rep: 8 }
         : { msg: '失主只說了聲謝就走，但旁人都看在眼裡，名聲穩漲。', inc: 0, rep: 5 }; } },
       { t: '收進功德箱（神明會懂）', roll() { return { msg: '香火帳多了一筆來路不明的錢。良心？神明說它在睡覺。', inc: RI(1200, 2400), rep: -3 }; } },
@@ -1157,13 +1225,16 @@ async function showExit() {
 
   const save = getSave();
   const passive = passiveOf(state.god.id);
+  const perk = state.mult.perk || {}; // 後宮加持
   // 王爺「開壇」/被動 → 結算香火倍率
   const shiftMult = (state.skill.shiftMult || 1);
   const gross = Math.round(state.incense * shiftMult);
-  // 關聖「義薄雲天」→ 開銷減半
-  const overhead = Math.round(shiftOverhead(save.rep, save.day) * (state.skill.halfOverhead ? 0.5 : 1));
+  // 關聖「義薄雲天」→ 開銷減半；Tina・免稅特權 → overheadMul（0=全免）
+  const overhead = Math.round(shiftOverhead(save.rep, save.day) * (state.skill.halfOverhead ? 0.5 : 1) * (perk.overheadMul != null ? perk.overheadMul : 1));
   const repGain = (state.mult.repGain || 1) * (passive.repGain || 1);
-  const repD = repDelta(state.faith, state.score.heckled > 0, state.score.lostFans, repGain) + (state.repBonus || 0);
+  let repD = repDelta(state.faith, state.score.heckled > 0, state.score.lostFans, repGain) + (state.repBonus || 0);
+  // Coco 姐・名媛背書：每班名聲保底大漲（取正成長與保底的較大值）
+  if (perk.repFloor) repD = Math.max(repD, perk.repFloor);
   // 香火毛收 = 信眾問答 + 事件增減（兩者都已累進 state.incense），這裡拆出事件淨額供顯示
   const eventIncense = (state.ledger || []).reduce((sum, it) => sum + (it.incense || 0), 0);
   const answerIncense = Math.round((state.incense - eventIncense) * shiftMult);
@@ -1172,9 +1243,16 @@ async function showExit() {
   const net = gross - overhead;
   addCash(net); // addCash 內部 clamp >=0，等於現金不夠時歸零
 
-  // 高利貸：每班自動扣現金繳「當輪應繳」、剩餘滾利，繳不出就逾期累計
-  const lt = tickLoan(save);
-  if (lt.autoPaidFromCash > 0) addCash(-lt.autoPaidFromCash);
+  // 薇薇安・喬掉債務：高利貸一筆勾銷（零利率＝直接清掉本班的債務 tick）
+  let lt;
+  if (perk.loanFree) {
+    if (save.loan && save.loan.owed > 0) { save.loan = { principal: 0, owed: 0, missed: 0 }; persist(); }
+    lt = { autoPaidFromCash: 0, interest: 0, missed: false, milestone: null };
+  } else {
+    // 高利貸：每班自動扣現金繳「當輪應繳」、剩餘滾利，繳不出就逾期累計
+    lt = tickLoan(save);
+    if (lt.autoPaidFromCash > 0) addCash(-lt.autoPaidFromCash);
+  }
   persist();
   setRep(save.rep + repD);
   bump('lifetimeIncome', Math.max(0, gross));
@@ -1226,6 +1304,7 @@ async function showExit() {
   $('settle-ach').innerHTML = got.length
     ? got.map((a) => `<span class="ach">${a.label}</span>`).join('')
     : '<span class="ach muted">本場無解鎖成就（太正常了）</span>';
+  refreshScroll(); // 結算列很長，小螢幕要能捲到「重新開始」鈕
 
   // 高利貸逾期里程碑：第 3 / 7 / 10 班越來越嚴重；第 10 班＝沉海 game over
   if (lt.milestone) {
@@ -1416,12 +1495,18 @@ if (import.meta.env?.DEV) { window.__state = state; window.__store = getSave(); 
     document.addEventListener(ev, (e) => e.preventDefault(), { passive: false }));
   // 雙指 touchmove = 捏放 → 擋掉（單指照常，遊戲互動不受影響）
   document.addEventListener('touchmove', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
-  // 雙擊縮放：320ms 內第二次 tap 擋掉（但放行按鈕/可點元素，避免影響快速連點下注、選項）
-  let lastTap = 0;
+  // 桌機/部分瀏覽器的 dblclick 也擋（保險）
+  document.addEventListener('dblclick', (e) => e.preventDefault(), { passive: false });
+  // 雙擊縮放：350ms 內、位置相近的「第二下」才擋（位置遠＝是兩顆不同按鈕的快速連點，照常放行）。
+  // ⚠️ 不再因為點在按鈕上就放行——iOS 雙擊「同一顆按鈕」一樣會觸發整頁縮放；
+  //    只用「時間+位置接近」判定 zoom 手勢，這樣連點不同下注鈕/選項不受影響。
+  let lastTap = 0; let lastX = 0; let lastY = 0;
   document.addEventListener('touchend', (e) => {
     const now = Date.now();
-    const onInteractive = e.target.closest?.('button,a,input,textarea,[role="button"],[data-i],.jd-opt,.cas-chip,.gmb-tier,.god-card');
-    if (now - lastTap < 320 && !onInteractive) e.preventDefault();
-    lastTap = now;
+    const t = e.changedTouches && e.changedTouches[0];
+    const x = t ? t.clientX : 0; const y = t ? t.clientY : 0;
+    const near = Math.abs(x - lastX) < 36 && Math.abs(y - lastY) < 36;
+    if (now - lastTap < 350 && near) e.preventDefault(); // 同位置雙擊＝縮放手勢 → 擋掉（click 仍由第一下觸發）
+    lastTap = now; lastX = x; lastY = y;
   }, { passive: false });
 })();

@@ -2,9 +2,9 @@ import { PICK_N, R, RI } from './content.js';
 import { asset } from './asset.js';
 
 export const BG = {
-  normal: '/bg/temple-day.jpg',
-  possessed: '/bg/possession.jpg',
-  texture: '/bg/ritual-texture.jpg',
+  normal: '/bg/temple-day.webp',
+  possessed: '/bg/possession.webp',
+  texture: '/bg/ritual-texture.webp',
 };
 
 export function applyBackgrounds(possessed = false) {

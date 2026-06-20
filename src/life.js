@@ -125,22 +125,22 @@ export { ENDINGS };
 
 /* ── 回訪事件 ── 依 trust / 結局決定，回訪時可能發生的「出乎意料」 */
 export const REVISITS = {
-  donate: { id: 'donate', img: '/events/revisit-donate.jpg', title: '信眾回來包大紅包',
+  donate: { id: 'donate', img: '/events/revisit-donate.webp', title: '信眾回來包大紅包',
     line: (n) => `${n}：師父！上次聽你的我發了！這包您一定要收下！`,
     effect: { cash: () => 8000 + Math.floor(Math.random() * 40000) }, good: true },
-  seduce: { id: 'seduce', img: '/events/revisit-seduce.jpg', title: '信眾回來色誘求婚',
+  seduce: { id: 'seduce', img: '/events/revisit-seduce.webp', title: '信眾回來色誘求婚',
     line: (n) => `${n}：師父～自從那次，我滿腦子都是你…我們結婚好不好？`,
     effect: { rep: () => 4, dating: () => 1 }, good: true },
-  gift: { id: 'gift', img: '/events/revisit-gift.jpg', title: '信眾送匾額答謝',
+  gift: { id: 'gift', img: '/events/revisit-gift.webp', title: '信眾送匾額答謝',
     line: (n) => `${n}：師父神準！我送您一面「有求必應」匾額！`,
     effect: { rep: () => 6 }, good: true },
-  revenge: { id: 'revenge', img: '/events/revisit-revenge.jpg', title: '信眾記仇上門鬧事',
+  revenge: { id: 'revenge', img: '/events/revisit-revenge.webp', title: '信眾記仇上門鬧事',
     line: (n) => `${n}：你這神棍！害我家破人亡，今天跟你算帳！`,
     effect: { rep: () => -8, cash: () => -(3000 + Math.floor(Math.random() * 8000)) }, good: false },
-  thug: { id: 'thug', img: '/events/revisit-thug.jpg', title: '信眾帶兄弟來砸場',
+  thug: { id: 'thug', img: '/events/revisit-thug.webp', title: '信眾帶兄弟來砸場',
     line: (n) => `${n}：我帶兄弟來「請教」師父，上次那句話什麼意思啊？`,
     effect: { rep: () => -6, cash: () => -(5000 + Math.floor(Math.random() * 12000)) }, good: false },
-  broke: { id: 'broke', img: '/events/revisit-broke.jpg', title: '破產信眾上門下跪',
+  broke: { id: 'broke', img: '/events/revisit-broke.webp', title: '破產信眾上門下跪',
     line: (n) => `${n}：師父…我全聽你的，現在什麼都沒了…求您再指條路…`,
     effect: { rep: () => -3 }, good: false },
 };
