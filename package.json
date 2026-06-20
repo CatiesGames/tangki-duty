@@ -1,0 +1,15 @@
+{
+  "name": "tangki-duty",
+  "version": "0.1.0",
+  "private": true,
+  "description": "乩身值班系統 — 起乩流程體驗小應用",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^6.3.5"
+  }
+}

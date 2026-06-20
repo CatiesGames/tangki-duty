@@ -1,0 +1,51 @@
+[
+  {
+    "id": "knet",
+    "name": "高雅琪",
+    "label": "精緻韓系網美",
+    "file": "knet.jpg",
+    "prompt": "photorealistic editorial photography, 35mm, natural light, shallow depth of field, authentic Taiwan temple courtyard / old street with incense smoke, red lanterns, gold deity statues, portrait orientation 3:4, full or 3/4 body, single person, candid, film grain, no text, ultra-refined Korean-style internet beauty, flawless glass skin makeup, designer beige coat, luxury bag, standing elegantly amid heavy incense smoke and rows of red lanterns in an old Taiwanese temple — strong contrast of high-fashion K-beauty against folk religion grit"
+  },
+  {
+    "id": "jpgirl",
+    "name": "周詩涵",
+    "label": "日系雜誌感美女",
+    "file": "jpgirl.jpg",
+    "prompt": "photorealistic editorial photography, 35mm, natural light, shallow depth of field, authentic Taiwan temple courtyard / old street with incense smoke, red lanterns, gold deity statues, portrait orientation 3:4, full or 3/4 body, single person, candid, film grain, no text, Japanese magazine-style beauty (mori/clean aesthetic), soft natural makeup, linen dress, airy and fresh, holding three incense sticks in a weathered traditional Taiwan temple, contrast of Japanese editorial freshness against old folk shrine"
+  },
+  {
+    "id": "89c",
+    "name": "小馬",
+    "label": "典型 8+9",
+    "file": "89c.jpg",
+    "prompt": "photorealistic editorial photography, 35mm, natural light, shallow depth of field, authentic Taiwan temple courtyard / old street with incense smoke, red lanterns, gold deity statues, portrait orientation 3:4, full or 3/4 body, single person, candid, film grain, no text, archetypal Taiwanese 8+9 youth, EXTREMELY tight muscle tank showing scrawny frame, super skinny legs, tight skinny pants, heavy gold chains, full half-sleeve dragon tattoo, classic \"A-zhi\" mullet-undercut haircut, betel nut in mouth, gold-rimmed slippers, leaning on a scooter outside a temple, swagger and gold teeth"
+  },
+  {
+    "id": "streamer",
+    "name": "阿凱",
+    "label": "直播主",
+    "file": "streamer.jpg",
+    "prompt": "photorealistic editorial photography, 35mm, natural light, shallow depth of field, authentic Taiwan temple courtyard / old street with incense smoke, red lanterns, gold deity statues, portrait orientation 3:4, full or 3/4 body, single person, candid, film grain, no text, Taiwanese live-streamer guy, holding phone on selfie stick with ring light, headset around neck, hyped expression, temple"
+  },
+  {
+    "id": "spiritgirl",
+    "name": "林沛蓁",
+    "label": "通靈少女",
+    "file": "spiritgirl.jpg",
+    "prompt": "photorealistic editorial photography, 35mm, natural light, shallow depth of field, authentic Taiwan temple courtyard / old street with incense smoke, red lanterns, gold deity statues, portrait orientation 3:4, full or 3/4 body, single person, candid, film grain, no text, ethereal young Taiwanese woman, pale, long black hair, white dress, mysterious calm gaze, dim temple interior with smoke"
+  },
+  {
+    "id": "councilor",
+    "name": "鄭明川",
+    "label": "地方議員",
+    "file": "councilor.jpg",
+    "prompt": "photorealistic editorial photography, 35mm, natural light, shallow depth of field, authentic Taiwan temple courtyard / old street with incense smoke, red lanterns, gold deity statues, portrait orientation 3:4, full or 3/4 body, single person, candid, film grain, no text, Taiwanese local councilor, campaign vest with sash, fake warm smile, shaking hands gesture, temple festival"
+  },
+  {
+    "id": "xishi",
+    "name": "謝佩芸",
+    "label": "檳榔西施",
+    "file": "xishi.jpg",
+    "prompt": "photorealistic editorial photography, 35mm, natural light, shallow depth of field, authentic Taiwan temple courtyard / old street with incense smoke, red lanterns, gold deity statues, portrait orientation 3:4, full or 3/4 body, single person, candid, film grain, no text, Taiwanese betel-nut-stand beauty (binlang xishi) in glam outfit after shift, neon-lit vibe but now at a quiet temple at dusk, contrast"
+  }
+]

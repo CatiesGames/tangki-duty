@@ -1,0 +1,441 @@
+:root{
+  --ink:#1a1210;--paper:#f6f0e8;--red:#b80f1a;--gold:#c9a227;--gold-l:#f4dd86;
+  --jade:#1f6b5c;--dim:#b6a892;--line:#d9cfc4;
+  --p-void:#0a0204;
+  --god-accent:#b80f1a;--god-glow-active:transparent;--god-scale:1.08;
+  --shake-int:1;--inv-x:0px;--inv-y:0px;
+  /* 全站統一使用 Iansui（使用者指定）。fallback 才用其他中文字體。 */
+  --serif:"Iansui","Noto Serif TC",serif;
+  --hand:"Iansui","Noto Serif TC",serif;
+  --brush:"Iansui","Noto Serif TC",serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--p-void);color:#fdf3e6;
+  font-family:var(--hand);-webkit-font-smoothing:antialiased}
+button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
+.hidden{display:none!important}
+img{user-select:none;-webkit-user-drag:none}
+
+/* ── backgrounds ── */
+#bg-photo{position:fixed;inset:0;z-index:0;background:center/cover no-repeat;
+  transition:filter 1s ease,transform 8s ease;filter:saturate(.95) brightness(.8)}
+body.possessed #bg-photo{filter:saturate(1.35) brightness(.42) contrast(1.18);transform:scale(1.08)}
+#bg-texture{position:fixed;inset:0;z-index:1;opacity:.1;background:center/cover no-repeat;pointer-events:none;mix-blend-mode:overlay}
+#bg-ambient{position:fixed;inset:0;pointer-events:none;z-index:2;
+  background:
+    radial-gradient(ellipse 120% 90% at 50% 8%,rgba(255,225,180,.1),transparent 42%),
+    radial-gradient(ellipse 100% 88% at 50% 50%,rgba(8,3,6,.35) 0%,rgba(8,3,6,.7) 60%,rgba(6,1,4,.9) 100%)}
+body.possessed #bg-ambient{background:radial-gradient(ellipse 80% 70% at 50% 44%,rgba(8,0,2,.08) 0%,rgba(8,0,2,.58) 52%,rgba(4,0,1,.92) 100%)}
+
+/* ── blood layer ── */
+#blood-layer{position:fixed;inset:0;z-index:45;pointer-events:none;opacity:0;transition:opacity .4s}
+body.ritual-blood #blood-layer{opacity:1}
+#blood-canvas{display:block;width:100%;height:100%}
+body.blood-flash #blood-layer{animation:bloodFlash .15s ease}
+@keyframes bloodFlash{50%{filter:brightness(1.5) saturate(1.6) contrast(1.2)}}
+
+/* ── possession dimension ── */
+#dimension{position:fixed;inset:0;z-index:50;pointer-events:none;opacity:0;transition:opacity .9s cubic-bezier(.4,0,.2,1)}
+body.possessed #dimension,body.entering #dimension{opacity:1}
+#godfx-canvas{position:absolute;inset:0;width:100%;height:100%;opacity:0;transition:opacity .8s ease;mix-blend-mode:screen}
+body.possessed #godfx-canvas{opacity:1}
+#dim-vignette{position:absolute;inset:0;background:radial-gradient(ellipse 70% 64% at 50% 42%,transparent 0%,rgba(0,0,0,.6) 100%)}
+#dim-glow{position:absolute;inset:-25%;background:radial-gradient(circle at 50% 40%,var(--god-glow-active) 0%,transparent 52%);animation:dimPulse 3s ease-in-out infinite alternate}
+@keyframes dimPulse{from{transform:scale(1)}to{transform:scale(1.08) rotate(3deg)}}
+#particles{position:absolute;inset:0;overflow:hidden}
+.particle{position:absolute;border-radius:50%;opacity:0;animation:floatUp linear infinite;will-change:transform,opacity}
+@keyframes floatUp{0%{opacity:0;transform:translateY(20px) scale(.6)}15%{opacity:.85}85%{opacity:.4}100%{opacity:0;transform:translateY(-120vh) scale(1.3)}}
+
+#god-fx{position:absolute;inset:0;opacity:0;transition:opacity .6s;mix-blend-mode:screen}
+body.possessed #god-fx{opacity:.7}
+body.fx-santaizi #god-fx{background:radial-gradient(circle at 50% 80%,rgba(255,34,68,.4) 0%,transparent 50%)}
+body.fx-guan #god-fx{background:radial-gradient(ellipse 40% 90% at 18% 50%,rgba(180,20,20,.28) 0%,transparent 60%),radial-gradient(ellipse 40% 90% at 82% 50%,rgba(180,20,20,.28) 0%,transparent 60%)}
+body.fx-mazu #god-fx{background:linear-gradient(180deg,rgba(60,120,200,.22) 0%,transparent 35%,rgba(60,120,200,.16) 65%,transparent 100%)}
+body.fx-jigong #god-fx{background:radial-gradient(circle at 50% 46%,rgba(255,180,40,.32) 0%,transparent 46%)}
+body.fx-wangye #god-fx{background:radial-gradient(ellipse 100% 44% at 50% 100%,rgba(255,215,0,.22) 0%,transparent 62%)}
+
+#possession-burst{position:fixed;inset:0;z-index:70;pointer-events:none;opacity:0;display:flex;align-items:center;justify-content:center}
+#possession-burst.show{animation:burstShow 2.4s ease forwards}
+#possession-burst .burst-text{font-family:var(--brush);font-size:clamp(44px,9vw,100px);color:var(--gold-l);letter-spacing:.12em;text-align:center;padding:0 6vw;
+  text-shadow:0 0 50px var(--god-glow-active),0 0 14px var(--god-accent),0 4px 0 #000;transform:scale(0);opacity:0}
+#possession-burst.show .burst-text{animation:burstText 2.2s ease forwards}
+@keyframes burstShow{0%{opacity:1}85%{opacity:1}100%{opacity:0}}
+@keyframes burstText{0%{transform:scale(3.2);opacity:0;letter-spacing:.6em}24%{transform:scale(1);opacity:1;letter-spacing:.12em}70%{opacity:1}100%{transform:scale(1.12);opacity:0}}
+
+/* floating crowd — feathered edges, no ugly corners */
+#scene-objects{position:fixed;inset:0;z-index:55;pointer-events:none;overflow:hidden}
+#believers{position:fixed;inset:0;z-index:56;pointer-events:none}
+.believer-float{position:absolute;opacity:0;transform:translateY(24px) scale(.8);transition:opacity .8s ease,transform .9s cubic-bezier(.2,.8,.2,1);z-index:56;will-change:transform,opacity}
+body.possessed .believer-float.show{opacity:1;transform:translateY(0) scale(var(--bel-scale,1))}
+.believer-float-card{width:clamp(80px,12vw,128px)}
+.believer-float-photo{aspect-ratio:3/4;overflow:hidden;border-radius:12px;
+  -webkit-mask-image:radial-gradient(ellipse 76% 82% at 50% 42%,#000 60%,transparent 100%);
+  mask-image:radial-gradient(ellipse 76% 82% at 50% 42%,#000 60%,transparent 100%)}
+.believer-float-photo img{width:100%;height:100%;object-fit:cover;object-position:center top;display:block;filter:saturate(1.05)}
+.believer-float-info{text-align:center;margin-top:2px}
+.believer-float-info .nm{font-size:11px;font-weight:700;color:var(--gold-l);text-shadow:0 1px 4px #000}
+.believer-float-info .st{font-size:8.5px;color:rgba(255,235,200,.6);text-shadow:0 1px 3px #000}
+.believer-hot .believer-float-info .nm{color:#ffd0e0}
+
+/* ── HUD shell ── */
+#hud{position:fixed;inset:0;z-index:100;display:grid;grid-template-rows:auto minmax(0,1fr) auto;pointer-events:none;padding-top:env(safe-area-inset-top)}
+body.invoke-shaking #hud{transform:translate(var(--inv-x),var(--inv-y))}
+#hud header,#hud main,#hud footer,#hud #event-overlay{pointer-events:auto}
+#stage{position:relative;min-height:0;overflow:hidden}
+
+.hud-top{padding:12px 16px 4px;text-align:center;flex-shrink:0}
+.hud-center{max-width:600px;margin:0 auto}
+.hdr-eyebrow{font-size:10px;letter-spacing:3px;color:rgba(255,225,190,.6);text-shadow:0 1px 4px #000}
+.hdr-title{font-family:var(--brush);font-size:clamp(30px,6vw,46px);line-height:1.05;color:var(--gold-l);margin:2px 0;
+  text-shadow:0 0 22px rgba(0,0,0,.8),0 0 12px var(--god-accent),0 2px 0 #000}
+.hdr-sub{font-size:12px;color:rgba(255,236,210,.78);line-height:1.4;text-shadow:0 1px 4px #000}
+
+.hud-stats{display:flex;gap:8px;justify-content:center;margin-top:8px;flex-wrap:wrap}
+.stat-pill{padding:5px 14px;border-radius:99px;font-size:9px;text-align:center;background:rgba(14,4,8,.6);backdrop-filter:blur(10px);border:1px solid rgba(201,162,39,.3)}
+.stat-pill b{display:block;font-size:14px;color:var(--gold-l);font-variant-numeric:tabular-nums}
+.stat-pill span{color:rgba(255,228,194,.65)}
+
+.hud-footer{padding:8px 16px calc(14px + env(safe-area-inset-bottom));display:flex;flex-direction:column;align-items:center;gap:10px;z-index:110;
+  background:linear-gradient(180deg,transparent,rgba(8,2,6,.82) 38%)}
+.hud-steps{display:flex;gap:7px;justify-content:center}
+.step{width:8px;height:8px;border-radius:50%;background:rgba(201,162,39,.3);transition:all .3s}
+.step.on{background:var(--gold-l);transform:scale(1.4);box-shadow:0 0 12px var(--gold)}
+
+/* phases */
+.phase{display:none;position:absolute;inset:0;animation:fadeUp .4s ease}
+.phase.active{display:flex;flex-direction:column;overflow:hidden}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+.center-col{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:10px 18px;text-align:center;width:100%;max-width:560px;margin:0 auto}
+.center-col h3{font-size:clamp(17px,2.6vw,22px);font-weight:900;letter-spacing:1px;font-family:var(--serif);color:var(--gold-l);text-shadow:0 2px 8px #000}
+.panel-desc{font-size:12.5px;line-height:1.65;color:rgba(255,232,202,.82);margin:0;text-shadow:0 1px 4px #000}
+
+/* 回地圖按鈕（選神畫面左上） */
+.phase-back{position:absolute;top:calc(10px + env(safe-area-inset-top));left:12px;z-index:130;
+  font-size:13px;color:rgba(255,236,206,.9);padding:7px 14px;border-radius:99px;
+  background:rgba(8,2,6,.7);border:1px solid rgba(201,162,39,.35);backdrop-filter:blur(6px)}
+.phase-back:hover{border-color:var(--gold-l);color:var(--gold-l)}
+.phase-biz{position:absolute;top:calc(10px + env(safe-area-inset-top));right:12px;z-index:130;
+  font-size:13px;font-weight:800;color:#fff;padding:7px 14px;border-radius:99px;
+  background:linear-gradient(135deg,var(--red),#5a0610);border:1px solid #ff7a5a;box-shadow:0 4px 14px rgba(0,0,0,.5)}
+.phase-biz:hover{box-shadow:0 4px 14px rgba(0,0,0,.5),0 0 16px rgba(255,90,40,.6)}
+
+/* ── 1 · god carousel ── */
+.select-wrap{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:flex-start;gap:10px;padding:4px 0}
+.select-head{text-align:center;padding:0 18px;flex-shrink:0}
+.select-head h3{font-size:clamp(18px,2.8vw,24px);font-weight:900;letter-spacing:1px;font-family:var(--serif);color:var(--gold-l);text-shadow:0 2px 10px #000}
+/* 本班起乩開銷：選神頁的膠囊提示（退駕時會扣這筆） */
+.shift-cost{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:center;margin:8px auto 0;padding:6px 14px;border-radius:999px;
+  background:rgba(40,18,6,.62);border:1px solid rgba(201,162,39,.42);font-size:12px;color:rgba(255,232,202,.86);backdrop-filter:blur(6px)}
+.shift-cost .sc-ic{font-size:14px}
+.shift-cost b{color:#ffd96a;font-variant-numeric:tabular-nums}
+.shift-cost small{flex-basis:100%;text-align:center;font-size:10px;color:rgba(255,225,190,.5);margin-top:1px}
+/* carousel 佔滿剩餘高度並置中，圖片才不會跟標題隔一大段空白 */
+.carousel{position:relative;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;width:100%}
+.carousel-stage{position:relative;width:100%;max-width:760px;height:100%;perspective:1200px}
+.god-rail{position:absolute;inset:0;transform-style:preserve-3d}
+/* 統一 3:4 直式卡，全部 cover 滿版填滿（橫式王爺裁切沒關係，使用者指定）。
+   置中：top/bottom:0 + margin:auto 處理垂直；水平靠 left:50% 並由 JS 設 margin-left:-半寬。 */
+.god-card{position:absolute;top:0;bottom:0;left:50%;margin-top:auto;margin-bottom:auto;height:86%;aspect-ratio:3/4;
+  transform-origin:center;border-radius:20px;overflow:hidden;padding:0;cursor:pointer;background:#0a0306;
+  border:1px solid rgba(201,162,39,.25);transition:transform .45s cubic-bezier(.2,.8,.2,1),opacity .45s ease,box-shadow .3s;
+  will-change:transform,opacity;box-shadow:0 18px 50px rgba(0,0,0,.6);-webkit-backface-visibility:hidden;backface-visibility:hidden}
+.god-card-img{position:absolute;inset:0;overflow:hidden;border-radius:inherit}
+.god-card-bg{display:none}
+.god-card-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center center;display:block;filter:saturate(1.05)}
+.god-card.landscape .god-card-img img{object-position:center center}
+/* 名牌只壓在圖片最底緣一小條，不蓋到主體 */
+.god-card-body{position:absolute;left:0;right:0;bottom:0;padding:24px 12px 10px;text-align:center}
+.god-card.selected .god-card-body{background:linear-gradient(180deg,transparent,rgba(5,1,3,.82) 60%)}
+.god-card:not(.selected) .god-card-body{opacity:0}
+.god-card-body b{display:block;font-family:var(--serif);font-size:18px;color:var(--gold-l);letter-spacing:2px;text-shadow:0 2px 8px #000}
+.god-card-body span{font-size:11px;color:rgba(255,230,196,.8)}
+.god-card-body small{display:block;font-size:9.5px;color:var(--gold-l);margin-top:4px;line-height:1.35;font-weight:700;opacity:.85}
+.god-card.selected{border-color:var(--god-accent);box-shadow:0 0 0 2px var(--god-accent),0 22px 60px rgba(0,0,0,.7),0 0 50px var(--god-glow-active)}
+/* 箭頭用 CSS 邊框畫 chevron，完全對稱、不受字體 side-bearing 影響 → 真正置中 */
+.carousel-arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:60;width:46px;height:46px;border-radius:50%;
+  background:rgba(12,4,8,.7);border:1px solid rgba(201,162,39,.4);font-size:0;color:transparent;
+  display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);transition:background .18s,transform .18s,box-shadow .18s}
+.carousel-arrow::before{content:"";width:12px;height:12px;border-top:2.5px solid var(--gold-l);border-right:2.5px solid var(--gold-l);transition:border-color .18s}
+.carousel-arrow.prev::before{transform:translateX(2px) rotate(-135deg)}
+.carousel-arrow.next::before{transform:translateX(-2px) rotate(45deg)}
+.carousel-arrow:hover{background:var(--god-accent);transform:translateY(-50%) scale(1.08)}
+.carousel-arrow:hover::before{border-color:#fff}
+.carousel-arrow.prev{left:max(8px,2vw)} .carousel-arrow.next{right:max(8px,2vw)}
+
+.god-detail{max-width:480px;margin:0 auto;padding:0 20px;text-align:center}
+.god-detail-name{font-family:var(--serif);font-weight:900;font-size:17px;color:var(--gold-l);letter-spacing:1px;text-shadow:0 2px 8px #000}
+.god-detail-desc{font-size:12px;line-height:1.6;color:rgba(255,232,202,.82);margin:6px 0;text-shadow:0 1px 4px #000}
+.god-specialty{font-size:11.5px;color:var(--gold-l);font-weight:800;line-height:1.5;text-shadow:0 1px 5px #000}
+.god-skill{display:inline-block;font-size:10.5px;color:rgba(255,235,190,.8);line-height:1.5;margin-top:2px}
+.god-skill.act{color:#ffcf8a}
+.bulletin-line{font-size:10px;color:rgba(255,228,196,.55);margin-top:8px;line-height:1.5}
+
+/* ── 2 · prep ── 步驟磚 + canvas 小遊戲覆蓋層 ── */
+.prep-note{font-size:12px;color:rgba(255,232,202,.72);margin:0;text-shadow:0 1px 4px #000;max-width:380px}
+.prep-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;width:100%;max-width:400px}
+.prep-tile{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:16px 8px;border-radius:18px;min-height:100px;
+  font-size:12px;font-weight:700;color:var(--gold-l);transition:transform .18s,border-color .18s,box-shadow .18s;overflow:hidden;
+  background:linear-gradient(160deg,rgba(28,10,14,.62),rgba(8,2,6,.5));border:1px solid rgba(201,162,39,.32)}
+.prep-tile:hover{transform:translateY(-2px);border-color:var(--gold-l)}
+.prep-tile .ico{font-size:32px;line-height:1;filter:drop-shadow(0 2px 8px rgba(0,0,0,.6))}
+.prep-tile .prep-label{font-size:12px;text-align:center;line-height:1.3}
+.prep-tile .prep-check{position:absolute;top:8px;right:10px;font-size:14px;color:var(--gold-l);opacity:0;transition:opacity .2s}
+.prep-tile.done{border-color:var(--gold);background:linear-gradient(160deg,rgba(201,162,39,.26),rgba(120,80,10,.18));box-shadow:0 0 20px rgba(255,215,0,.25)}
+.prep-tile.done .prep-check{opacity:1}
+.prep-tile.done .ico{filter:drop-shadow(0 0 10px var(--gold))}
+
+.prep-stage{position:fixed;inset:0;z-index:130;display:none;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at 50% 45%,rgba(10,2,6,.78),rgba(4,0,2,.92));backdrop-filter:blur(6px)}
+.prep-stage.show{display:flex;animation:fadeUp .25s ease}
+.prep-game-card{position:relative;width:min(440px,92vw);display:flex;flex-direction:column;align-items:center;gap:12px}
+.prep-canvas{width:min(420px,90vw);height:min(360px,52vh);touch-action:none;border-radius:18px}
+.prep-game-bar{width:min(300px,76vw);height:9px;background:rgba(255,255,255,.1);border-radius:99px;overflow:hidden}
+.prep-game-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--god-accent),var(--gold-l));border-radius:99px;transition:width .1s linear;box-shadow:0 0 12px var(--god-accent)}
+.prep-close{font-size:11px;color:rgba(255,228,196,.5);padding:6px 16px;border-radius:99px;border:1px solid rgba(255,215,0,.18);background:rgba(255,255,255,.04)}
+.prep-close:hover{color:var(--gold-l)}
+
+/* ── 3 · scan ── */
+.scan-col{justify-content:flex-start;padding-top:max(8vh,40px)}
+.scan-list{width:100%;max-width:460px;text-align:left}
+.scan-line{font-size:12.5px;padding:8px 2px;border-bottom:1px dashed rgba(255,215,0,.14);animation:scanIn .35s ease;color:rgba(255,236,206,.85);text-shadow:0 1px 3px #000}
+@keyframes scanIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:none}}
+.scan-line.done{color:var(--gold-l)}
+
+/* ── 4 · ritual + invoke ── */
+#ph-invoke.active{align-items:center;justify-content:center;padding:12px 16px}
+.ritual-zone,.invoke-zone{max-width:440px;width:100%;text-align:center}
+.ritual-canvas{width:min(420px,92vw);height:min(340px,46vh);margin:6px auto;display:block;touch-action:none}
+.ritual-feedback{font-size:15px;margin-top:4px;min-height:22px;font-weight:800;color:var(--gold-l);text-shadow:0 2px 8px #000;font-family:var(--serif)}
+.ritual-feedback[data-q="weak"]{color:#ff8a7a}
+.ritual-feedback[data-q="perfect"]{color:#9fe6a0}
+
+.invoke-ring{width:min(196px,50vw);height:min(196px,50vw);margin:0 auto;border-radius:50%;border:3px solid var(--god-accent);display:flex;align-items:center;justify-content:center;position:relative;transition:all .4s}
+body.possessed .invoke-ring{border-color:var(--gold);box-shadow:0 0 60px var(--god-glow-active)}
+.invoke-ring::before{content:"";position:absolute;inset:-12px;border-radius:50%;border:1px dashed rgba(201,162,39,.4);animation:spin 12s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#invoke-btn{width:min(158px,42vw);height:min(158px,42vw);border-radius:50%;background:radial-gradient(circle at 50% 35%,var(--god-accent),#5a0610);color:#fff;
+  font-family:var(--brush);font-size:clamp(26px,6.5vw,34px);letter-spacing:4px;box-shadow:0 10px 34px rgba(0,0,0,.5),0 0 30px var(--god-glow-active);touch-action:none;position:relative;z-index:2}
+.invoke-aura{position:absolute;inset:-14px;border-radius:50%;opacity:0;border:2px solid var(--god-accent);transition:opacity .3s}
+.invoke-ring.charging .invoke-aura{opacity:1;animation:auraPulse .8s ease-in-out infinite}
+@keyframes auraPulse{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(1.12);opacity:1}}
+#invoke-btn.holding{animation:btnPulse .5s ease-in-out infinite alternate}
+@keyframes btnPulse{from{box-shadow:0 0 22px var(--god-glow-active)}to{box-shadow:0 0 50px var(--god-accent)}}
+.shake-meter{width:min(320px,80vw);height:11px;background:rgba(255,255,255,.1);border-radius:99px;margin:20px auto 8px;overflow:hidden}
+#shake-fill{height:100%;width:0;background:linear-gradient(90deg,var(--god-accent),var(--gold-l));border-radius:99px;transition:width .06s linear;box-shadow:0 0 14px var(--god-accent)}
+.invoke-hint{font-size:12.5px;color:rgba(255,232,202,.8);line-height:1.7;margin-bottom:10px;text-shadow:0 1px 4px #000}
+.invoke-hint kbd{display:inline-block;background:rgba(255,255,255,.08);border-radius:5px;padding:1px 6px;font-size:9px;border:1px solid rgba(255,215,0,.25)}
+.invoke-hint strong{color:var(--gold-l)}
+
+/* ── 5 · serve ── */
+#ph-serve.active{align-items:center;justify-content:center;padding:6px 12px 6px;gap:6px}
+.serve-hud{display:flex;gap:10px;justify-content:center;flex-shrink:0;flex-wrap:wrap}
+.meter-orb{padding:7px 14px;border-radius:18px;text-align:center;font-size:9.5px;background:rgba(10,2,4,.6);backdrop-filter:blur(8px);border:1px solid rgba(255,215,0,.28);min-width:92px}
+.meter-orb b{display:block;font-size:16px;color:var(--gold-l);margin:2px 0;font-variant-numeric:tabular-nums}
+.meter-ring{height:5px;background:rgba(255,255,255,.12);border-radius:99px;overflow:hidden;margin-top:3px}
+.meter-ring i{display:block;height:100%;background:linear-gradient(90deg,var(--god-accent),var(--gold));border-radius:99px;transition:width .4s}
+.meter-ring i.low{background:linear-gradient(90deg,#c0392b,#e67e22);animation:lowPulse .8s ease-in-out infinite}
+@keyframes lowPulse{50%{opacity:.5}}
+
+.center-stage{flex:1 1 0;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;width:100%;max-width:620px;position:relative}
+.believer-frame{position:relative;flex:1 1 0;min-height:0;width:100%;z-index:2;overflow:hidden}
+/* 四邊羽化：單一 radial 遮罩，中心實、向四周提早淡出 → 邊緣柔化融入背景 */
+.believer-img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center bottom;opacity:0;transition:opacity .5s ease;
+  filter:drop-shadow(0 14px 44px rgba(0,0,0,.7));
+  -webkit-mask-image:radial-gradient(ellipse 70% 74% at 50% 48%, #000 38%, rgba(0,0,0,.85) 60%, transparent 90%);
+  mask-image:radial-gradient(ellipse 70% 74% at 50% 48%, #000 38%, rgba(0,0,0,.85) 60%, transparent 90%)}
+.believer-img.show{opacity:1;animation:believerIn .6s ease}
+@keyframes believerIn{from{transform:translateY(16px) scale(.97)}to{transform:none}}
+.believer-halo{position:absolute;left:50%;top:42%;width:min(420px,90%);aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,rgba(255,215,0,.14) 0%,transparent 62%);pointer-events:none;animation:haloPulse 3s ease-in-out infinite}
+@keyframes haloPulse{0%,100%{opacity:.6;transform:translate(-50%,-50%) scale(1)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.06)}}
+/* 浮動數值提示：放在氣泡上方、有實底膠囊，停久一點、看得清 */
+.reply-fx{position:absolute;left:50%;top:24%;transform:translateX(-50%);font-family:var(--hand);font-size:14px;font-weight:800;
+  color:#fff;padding:6px 16px;border-radius:99px;background:rgba(8,2,6,.92);border:1px solid rgba(255,215,0,.4);
+  box-shadow:0 6px 20px rgba(0,0,0,.6);opacity:0;pointer-events:none;white-space:nowrap}
+.reply-fx.show{animation:fxFloat 2.2s ease forwards}
+@keyframes fxFloat{0%{opacity:0;transform:translate(-50%,12px)}12%{opacity:1}82%{opacity:1}100%{opacity:0;transform:translate(-50%,-26px)}}
+
+/* 對話氣泡：實底深色，不透花背景，字大、好讀 */
+.speech-bubble{position:relative;width:min(460px,93vw);padding:16px 22px 18px;margin-top:8px;z-index:3;flex-shrink:0;
+  background:#120308;border:1px solid rgba(255,215,0,.34);
+  border-radius:22px 22px 22px 8px;box-shadow:0 0 34px rgba(255,100,0,.14),0 14px 44px rgba(0,0,0,.6)}
+.bubble-tail{position:absolute;top:-11px;left:42px;width:0;height:0;border-left:14px solid transparent;border-right:14px solid transparent;border-bottom:14px solid #120308}
+.ask-meta{font-size:11px;color:rgba(255,228,196,.7);margin-bottom:8px;display:flex;flex-wrap:wrap;gap:7px;align-items:center}
+.ask-meta .tag{background:rgba(255,215,0,.2);color:var(--gold-l);padding:2px 10px;border-radius:99px;font-weight:800;font-size:10px}
+.ask-meta .who{font-weight:600;color:rgba(255,236,206,.9)}
+.ask-mood{margin-left:auto;font-size:9.5px;opacity:.75}
+.believer-stats{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap}
+.believer-stats:empty{display:none}
+.bstat{flex:1;min-width:64px;font-size:8px;color:rgba(255,225,190,.55);position:relative}
+.bstat span{display:block;margin-bottom:2px;letter-spacing:1px}
+.bstat span em{font-style:normal;font-weight:800;margin-left:3px}
+.bstat span em.up{color:#9fe6a0}.bstat span em.down{color:#ff8a7a}
+.bstat.changed i{animation:statFlash .6s ease}
+@keyframes statFlash{0%,100%{filter:none}40%{filter:brightness(1.8) saturate(1.4)}}
+.bstat i{display:block;height:4px;border-radius:99px;background:#888;transition:width .5s cubic-bezier(.2,.8,.2,1)}
+.bstat i.b-trust{background:#c9a227}.bstat i.b-wealth{background:#3fae6a}.bstat i.b-love{background:#e8638e}.bstat i.b-health{background:#4fb0d6}
+.bubble-text{font-size:16px;line-height:1.75;margin:0;color:rgba(255,242,222,.98);min-height:1.75em}
+/* 玩家選擇後信眾的反應：金色強調、稍大，讓人一眼看到劇情推進 */
+.bubble-text.reaction{color:var(--gold-l);font-weight:700;font-size:16.5px}
+
+.reply-arc{display:flex;flex-direction:column;gap:8px;width:min(470px,94vw);margin:10px auto 0;flex-shrink:0}
+.reply-btn{text-align:left;padding:12px 16px;border-radius:16px;font-size:13px;line-height:1.5;color:rgba(255,240,218,.96);font-family:var(--serif);transition:transform .15s,border-color .15s,box-shadow .15s;
+  background:linear-gradient(160deg,rgba(26,9,13,.7),rgba(8,2,6,.55));border:1px solid rgba(255,215,0,.26)}
+.reply-btn:hover{border-color:var(--gold-l);transform:translateX(6px);box-shadow:0 0 18px rgba(255,215,0,.14)}
+.reply-btn .rl{font-size:10px;color:var(--gold-l);display:block;margin-bottom:3px;letter-spacing:1px;opacity:.85;font-family:var(--hand)}
+.reply-btn.picked{border-color:var(--gold-l)!important;box-shadow:0 0 20px rgba(255,215,0,.3)}
+.reply-btn:disabled{opacity:.35}
+.round-label{font-size:10px;text-align:center;color:rgba(255,228,196,.55);margin-top:6px;flex-shrink:0}
+/* 點一下繼續：信眾反應後，要點才推進（字看得完） */
+.tap-continue{display:none;text-align:center;font-size:13px;font-weight:800;color:#f4dd86;margin-top:8px;
+  padding:8px;border-radius:12px;background:rgba(255,215,0,.1);border:1px dashed rgba(255,215,0,.4);
+  animation:tapPulse 1.1s ease-in-out infinite}
+.tap-continue.show{display:block}
+@keyframes tapPulse{50%{opacity:.55}}
+/* 連段 HUD：浮在中央上方 */
+/* 賺乩幣金幣特效 */
+#coin-layer{position:fixed;inset:0;z-index:160;pointer-events:none;overflow:hidden}
+.coin{position:fixed;font-size:24px;will-change:transform,opacity;
+  animation:coinFly .85s cubic-bezier(.4,0,.3,1) var(--d,0ms) forwards;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5))}
+@keyframes coinFly{
+  0%{transform:translate(0,0) scale(.4) rotate(0);opacity:0}
+  15%{opacity:1;transform:translate(0,-20px) scale(1.1) rotate(40deg)}
+  100%{transform:translate(var(--tx),var(--ty)) scale(.5) rotate(360deg);opacity:0}}
+.coin-pop{position:fixed;font-family:var(--brush);font-size:clamp(22px,6vw,34px);font-weight:800;
+  color:#ffd64d;text-shadow:0 0 16px rgba(255,150,0,.9),0 2px 6px #000;white-space:nowrap;pointer-events:none;
+  transform:translateX(-50%);animation:coinPopUp 1.4s ease forwards}
+.coin-pop.crit{color:#ff5a4a;font-size:clamp(26px,7vw,40px)}
+@keyframes coinPopUp{0%{opacity:0;transform:translate(-50%,8px) scale(.7)}18%{opacity:1;transform:translate(-50%,-6px) scale(1.15)}40%{transform:translate(-50%,-14px) scale(1)}100%{opacity:0;transform:translate(-50%,-46px) scale(1)}}
+.meter-orb b.bump{animation:incBump .4s ease}
+@keyframes incBump{40%{transform:scale(1.35);color:#ffd64d}}
+/* 全螢幕金幣雨 + 金光閃 */
+.gold-flash{position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse 90% 70% at 50% 40%,rgba(255,210,80,.55),rgba(255,170,30,.2) 50%,transparent 75%);animation:goldFlash .7s ease forwards}
+@keyframes goldFlash{0%{opacity:0}20%{opacity:1}100%{opacity:0}}
+.rain-coin{position:fixed;will-change:transform;filter:drop-shadow(0 2px 5px rgba(0,0,0,.5));
+  animation:coinRainFall var(--dur,1100ms) cubic-bezier(.4,.1,.6,1) var(--delay,0ms) forwards}
+@keyframes coinRainFall{
+  0%{transform:translate(0,0) rotate(0);opacity:0}
+  10%{opacity:1}
+  100%{transform:translate(var(--sway,0),105vh) rotate(var(--rot,360deg));opacity:1}}
+
+.combo-hud{position:fixed;top:18%;left:50%;transform:translateX(-50%);z-index:118;
+  font-family:var(--brush);font-size:clamp(16px,4.5vw,22px);color:#ffd64d;
+  text-shadow:0 0 14px rgba(255,120,0,.8),0 2px 6px #000;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s}
+.combo-hud.show{opacity:1;animation:comboPop .3s ease}
+@keyframes comboPop{0%{transform:translateX(-50%) scale(1.3)}100%{transform:translateX(-50%) scale(1)}}
+/* 神明技能列：3 小招 + 1 大招。置中、在對話氣泡與神諭選項之間，桌機/手機都不擋元素 */
+.skill-bar{display:flex;justify-content:center;align-items:stretch;gap:6px;flex-shrink:0;
+  width:min(470px,94vw);margin:4px auto 2px;flex-wrap:nowrap}
+.sk-chip{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:7px 4px 6px;border-radius:13px;cursor:pointer;font-family:inherit;text-align:center;
+  background:linear-gradient(160deg,rgba(120,16,24,.85),rgba(60,6,12,.85));border:1px solid rgba(201,162,39,.5);
+  color:#fff;box-shadow:0 3px 12px rgba(0,0,0,.4);transition:transform .12s,box-shadow .2s;line-height:1.15}
+.sk-chip:active{transform:scale(.93)}
+.sk-chip .sk-ico{font-size:19px}
+.sk-chip .sk-name{font-size:10.5px;font-weight:800;color:var(--gold-l);max-width:100%}
+/* 效果直接顯示在卡上（不靠 hover）*/
+.sk-chip .sk-eff{font-size:9.5px;font-weight:700;color:#ffe6a8;line-height:1.25;max-width:100%}
+.sk-chip .sk-uses{font-size:8.5px;color:rgba(255,235,200,.6);margin-top:1px}
+.sk-chip.ult{flex:1.25 1 0;border-color:#ffb020;
+  background:linear-gradient(160deg,rgba(200,60,20,.95),rgba(120,20,8,.95));
+  box-shadow:0 3px 14px rgba(0,0,0,.5),0 0 16px rgba(255,140,40,.55);animation:skillGlow 1.6s ease-in-out infinite}
+.sk-chip.ult .sk-name{color:#ffd64d}
+.sk-chip.ult .sk-eff{color:#ffd64d}
+@keyframes skillGlow{50%{box-shadow:0 3px 14px rgba(0,0,0,.5),0 0 26px rgba(255,140,40,.85)}}
+.sk-chip.spent{opacity:.38;filter:grayscale(.6);animation:none;pointer-events:none}
+.sk-chip.armed{border-color:#9fe6a0;background:linear-gradient(160deg,rgba(40,120,60,.92),rgba(20,70,30,.92));animation:armedPulse 1s ease-in-out infinite}
+.sk-chip.armed .sk-uses{color:#bfffc0}
+.sk-chip[disabled]{cursor:default}
+@keyframes armedPulse{50%{box-shadow:0 3px 14px rgba(0,0,0,.5),0 0 22px rgba(120,255,140,.7)}}
+#ph-serve:not(.active) .combo-hud,#ph-serve:not(.active) .skill-bar{display:none}
+body:not(.possessed) .combo-hud,body:not(.possessed) .skill-bar{display:none}
+
+/* screen shake */
+body.shake-screen{animation:screenShake .24s ease}
+@keyframes screenShake{0%,100%{transform:translate(0,0)}15%{transform:translate(calc(-9px*var(--shake-int)),calc(3px*var(--shake-int))) rotate(calc(-.4deg*var(--shake-int)))}35%{transform:translate(calc(11px*var(--shake-int)),calc(-4px*var(--shake-int))) rotate(calc(.5deg*var(--shake-int)))}55%{transform:translate(calc(-8px*var(--shake-int)),calc(5px*var(--shake-int)))}75%{transform:translate(calc(9px*var(--shake-int)),calc(-3px*var(--shake-int))) rotate(calc(-.3deg*var(--shake-int)))}}
+
+/* exit */
+#exit-flash{position:fixed;inset:0;z-index:80;pointer-events:none;opacity:0;background:radial-gradient(circle,rgba(255,220,180,.9),rgba(255,60,40,.4),transparent 70%)}
+#exit-flash.show{animation:exitFlash 1.1s ease forwards}
+@keyframes exitFlash{0%{opacity:0}18%{opacity:.8}40%{opacity:.2}100%{opacity:0}}
+#exit-banner{position:fixed;left:50%;top:42%;transform:translate(-50%,-50%) scale(.9);z-index:81;pointer-events:none;opacity:0;font-family:var(--brush);font-size:clamp(30px,6vw,46px);color:var(--gold-l);letter-spacing:8px;text-shadow:0 0 24px rgba(255,100,0,.8);padding:12px 30px;border:1px solid rgba(255,215,0,.35);border-radius:50px;background:rgba(10,2,4,.82);backdrop-filter:blur(4px)}
+#exit-banner.show{animation:exitBanner 1.4s ease forwards}
+@keyframes exitBanner{0%{opacity:0;transform:translate(-50%,-50%) scale(1.2)}20%{opacity:1;transform:translate(-50%,-50%) scale(1)}75%{opacity:1}100%{opacity:0}}
+
+/* ── 6 · settlement ── */
+.settle-col{justify-content:center;gap:8px}
+.persona-card{text-align:center;padding:6px 0}
+.persona-eyebrow{font-size:10px;letter-spacing:3px;color:rgba(255,215,0,.6)}
+.persona-title{font-family:var(--brush);font-size:clamp(28px,6vw,42px);color:var(--gold-l);text-shadow:0 0 22px var(--god-glow-active),0 2px 8px #000;line-height:1.1;margin:2px 0}
+.persona-desc{font-size:12px;color:rgba(255,232,202,.82);line-height:1.6;max-width:420px;margin:0 auto;text-shadow:0 1px 4px #000}
+.settle-rows{width:100%;max-width:420px}
+.settle-row{display:flex;justify-content:space-between;padding:6px 2px;border-bottom:1px dashed rgba(255,215,0,.16);font-size:12.5px;color:rgba(255,240,218,.9)}
+.settle-row b{font-variant-numeric:tabular-nums;color:var(--gold-l)}
+.settle-ach{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:440px}
+.ach{font-size:11px;padding:4px 10px;border-radius:99px;background:rgba(255,215,0,.14);border:1px solid rgba(255,215,0,.3);color:var(--gold-l)}
+.ach.muted{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.12);color:rgba(255,235,200,.55)}
+.settle-irony{width:100%;max-width:420px;background:rgba(255,40,40,.06);border:1px dashed rgba(255,80,80,.3);border-radius:12px;padding:10px 14px}
+.irony-head{font-size:10px;letter-spacing:2px;color:#ff9a8a;margin-bottom:6px;opacity:.85}
+.irony-line{font-size:11.5px;color:rgba(255,210,190,.85);line-height:1.7;font-variant-numeric:tabular-nums}
+.share-row{display:flex;gap:8px;margin-top:8px;justify-content:center;width:100%;max-width:420px}
+.share-row button{flex:1;max-width:180px;padding:12px;border-radius:99px;font-size:12px;font-weight:800}
+.btn-share{background:linear-gradient(135deg,var(--gold),#b8860b);color:#1a0c06}
+.btn-restart{background:rgba(255,255,255,.08);color:rgba(255,236,210,.88);border:1px solid rgba(255,215,0,.22)}
+
+/* event overlay */
+#event-overlay{position:fixed;inset:0;background:rgba(0,0,0,.64);z-index:90;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px)}
+#event-overlay.show{display:flex}
+.event-orb{background:linear-gradient(160deg,#1a0006,#0a0003);border:2px solid var(--gold-l);border-radius:24px;padding:28px 24px;max-width:360px;width:100%;animation:popIn .35s cubic-bezier(.2,.9,.2,1);text-align:center;color:rgba(255,240,218,.95);box-shadow:0 0 50px rgba(255,160,0,.2)}
+@keyframes popIn{from{opacity:0;transform:scale(.88)}to{opacity:1;transform:none}}
+.event-orb h4{margin:0 0 8px;font-size:22px;color:var(--gold-l);font-family:var(--brush)}
+.event-orb p{font-size:12.5px;line-height:1.65;margin:0 0 14px;color:rgba(255,230,200,.8)}
+.revisit-img{width:140px;height:186px;margin:0 auto 10px;border-radius:14px;overflow:hidden;background:#0a0306;box-shadow:0 8px 28px rgba(0,0,0,.6)}
+.revisit-img img{width:100%;height:100%;object-fit:cover;object-position:center top}
+.revisit-line{font-size:14px;line-height:1.6;color:rgba(255,242,222,.96);margin-bottom:6px}
+.revisit-why{font-size:11px;line-height:1.5;color:rgba(255,210,150,.6);font-style:italic;margin-bottom:10px}
+.finale-body{font-size:14px;line-height:1.9;color:rgba(255,240,218,.96);margin-bottom:12px;text-align:left}
+.revisit-eff{font-size:13px;color:#f4dd86;font-weight:800;margin-bottom:8px}
+.event-btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.event-btns button{flex:1;min-width:130px;padding:11px 12px;border-radius:99px;font-size:11.5px;font-weight:800}
+.evt-primary{background:linear-gradient(135deg,var(--gold),#b8860b);color:#1a0006}
+.evt-secondary{background:rgba(255,255,255,.08);color:rgba(255,236,210,.82);border:1px solid rgba(255,215,0,.2)}
+
+/* CTA */
+.cta{width:min(380px,92vw);padding:15px 24px;border-radius:99px;color:#fff;font-size:16px;font-weight:900;letter-spacing:4px;font-family:var(--hand);transition:transform .2s,box-shadow .2s;box-shadow:0 8px 30px rgba(0,0,0,.4);position:relative;z-index:120;touch-action:manipulation}
+.cta:disabled{opacity:.4;pointer-events:none}
+.cta-glow{background:linear-gradient(135deg,var(--god-accent),#5a0610)}
+body.possessed .cta-glow{background:linear-gradient(135deg,#8b0000,var(--gold))}
+.cta:not(:disabled):active{transform:scale(.97)}
+.cta:not(:disabled):hover{transform:translateY(-1px);box-shadow:0 10px 34px var(--god-glow-active)}
+
+body.entering{animation:enterFlash .9s ease}
+@keyframes enterFlash{0%{filter:brightness(2.2) saturate(2)}40%{filter:brightness(.55)}100%{filter:none}}
+body.exiting-possession #dimension{opacity:0!important;transition:opacity 1.2s ease}
+body.exiting-possession .believer-float{opacity:0!important;transform:translateY(-24px) scale(.85)!important}
+
+/* ══ DESKTOP ══ */
+@media(min-width:820px){
+  .hud-top{padding:18px 28px 6px}
+  .hud-stats{position:fixed;top:20px;right:24px;flex-direction:column;align-items:flex-end;margin:0;z-index:115}
+  /* 選神頁右上給「廟務經營」用，隱藏重疊的統計膠囊（現金/名聲 hub 已顯示） */
+  body.on-start .hud-stats{display:none}
+  .stat-pill{min-width:132px}
+  .carousel-stage{max-width:760px}
+  .god-card{width:clamp(200px,20vw,250px);margin-left:calc(clamp(200px,20vw,250px) / -2)}
+  .prep-grid{grid-template-columns:repeat(4,1fr);max-width:660px}
+  .center-stage{max-width:760px}
+  .speech-bubble{width:min(560px,52vw)}
+  .reply-arc{width:min(640px,60vw);flex-direction:row;flex-wrap:wrap}
+  .reply-arc .reply-btn{flex:1;min-width:190px}
+  /* 桌機：技能列跟著神諭選項加寬、置中，仍在選項上方不擋人物 */
+  .skill-bar{width:min(640px,60vw)}
+  .sk-chip{padding:9px 8px}
+  .sk-chip .sk-ico{font-size:22px}
+  .sk-chip .sk-name{font-size:12px}
+  .sk-chip .sk-eff{font-size:11px}
+  .sk-chip .sk-uses{font-size:9.5px}
+  .serve-hud{position:fixed;top:96px;left:24px;flex-direction:column;z-index:115}
+  .ritual-canvas{height:min(380px,48vh)}
+}
+
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}

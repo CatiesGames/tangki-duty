@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover, user-scalable=no" />
+    <meta name="description" content="乩身值班系統 — 選神、降駕、執務、退駕" />
+    <title>乩身值班系統</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Iansui&family=Noto+Serif+TC:wght@700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <!-- ── atmosphere layers ── -->
+    <div id="bg-photo"></div>
+    <div id="bg-texture"></div>
+    <div id="bg-ambient"></div>
+
+    <!-- ── full-screen blood (accumulates, never clears) ── -->
+    <div id="blood-layer" aria-hidden="true"><canvas id="blood-canvas"></canvas></div>
+
+    <!-- ── possession dimension ── -->
+    <div id="dimension">
+      <canvas id="godfx-canvas" aria-hidden="true"></canvas>
+      <div id="god-fx" aria-hidden="true"></div>
+      <div id="dim-glow"></div>
+      <div id="particles"></div>
+      <div id="dim-vignette"></div>
+    </div>
+
+    <div id="possession-burst" aria-hidden="true"></div>
+    <div id="scene-objects"></div>
+    <div id="believers"></div>
+    <div id="exit-flash" aria-hidden="true"></div>
+    <div id="exit-banner" aria-hidden="true">元神退駕中</div>
+
+    <!-- ── shake wrapper (whole-screen invoke shake) ── -->
+    <div id="hud">
+      <header class="hud-top">
+        <div class="hud-center">
+          <div class="hdr-eyebrow">廟務數位系統 · 乩身值班</div>
+          <div class="hdr-title" id="hdr-title">乩身值班系統</div>
+          <div class="hdr-sub" id="hdr-sub">請神、降駕、執務、退駕。標準流程，一鍵演練。</div>
+        </div>
+        <div class="hud-stats" id="live-stats">
+          <div class="stat-pill"><b id="s-money">$0</b><span>現金</span></div>
+          <div class="stat-pill"><b id="s-count">5</b><span>名聲</span></div>
+          <div class="stat-pill"><b id="s-status">待機</b><span>元神狀態</span></div>
+        </div>
+      </header>
+
+      <main id="stage">
+        <!-- 1 · 選神（環狀角色選擇器） -->
+        <section class="phase active" id="ph-start">
+          <button class="phase-back" id="btn-to-map">‹ 回地圖</button>
+          <button class="phase-biz" id="btn-biz">🏯 廟務經營</button>
+          <div class="select-wrap">
+            <div class="select-head">
+              <h3>選擇今日降駕神明</h3>
+              <p class="panel-desc">左右滑動／點箭頭切換，中央即為今日所請。</p>
+              <div class="shift-cost" id="shift-cost" aria-label="本班起乩開銷"></div>
+            </div>
+            <div class="carousel">
+              <button class="carousel-arrow prev" id="god-prev" aria-label="上一位">‹</button>
+              <div class="carousel-stage"><div class="god-rail" id="god-grid"></div></div>
+              <button class="carousel-arrow next" id="god-next" aria-label="下一位">›</button>
+            </div>
+            <div class="god-detail" id="god-detail-card">
+              <div class="god-detail-name" id="god-detail-title"></div>
+              <p class="god-detail-desc" id="god-detail-desc"></p>
+              <p class="god-specialty" id="god-specialty"></p>
+              <p class="bulletin-line" id="bulletin"></p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2 · 準備 -->
+        <section class="phase" id="ph-prep">
+          <div class="center-col">
+            <h3 id="prep-title">降駕前準備</h3>
+            <p class="prep-note" id="prep-note">點選每個步驟，完成各自的小儀式（嚼、佩戴、蓄氣、揮舞…）。</p>
+            <div class="prep-grid" id="prep-grid"></div>
+          </div>
+          <div class="prep-stage" id="prep-stage"></div>
+        </section>
+
+        <!-- 3 · 審查 -->
+        <section class="phase" id="ph-scan">
+          <div class="center-col scan-col">
+            <h3>資格審查中</h3>
+            <div id="scan-list" class="scan-list"></div>
+          </div>
+        </section>
+
+        <!-- 4 · 請神（儀式 + 搖晃） -->
+        <section class="phase" id="ph-invoke">
+          <div id="ritual-zone" class="ritual-zone"></div>
+          <div id="invoke-phase" class="invoke-zone hidden">
+            <p class="invoke-hint" id="invoke-hint"></p>
+            <div class="invoke-ring" id="invoke-ring">
+              <div class="invoke-aura" id="invoke-aura"></div>
+              <button type="button" id="invoke-btn">請神</button>
+            </div>
+            <div class="shake-meter"><div id="shake-fill"></div></div>
+            <p class="invoke-hint" id="shake-status">氣場強度：0%</p>
+          </div>
+        </section>
+
+        <!-- 5 · 執務（問答 + 三儀表） -->
+        <section class="phase" id="ph-serve">
+          <div class="serve-hud">
+            <div class="meter-orb">
+              <span>香火💰</span><b id="m-incense">0</b>
+              <div class="meter-ring"><i id="mb-incense" style="width:0%"></i></div>
+            </div>
+            <div class="meter-orb">
+              <span>滿意😊</span><b id="m-faith">70%</b>
+              <div class="meter-ring"><i id="mb-faith" style="width:70%"></i></div>
+            </div>
+            <div class="meter-orb">
+              <span>元神🔥</span><b id="m-stable">100%</b>
+              <div class="meter-ring"><i id="mb-stable" style="width:100%"></i></div>
+            </div>
+          </div>
+
+          <div class="center-stage" id="center-stage">
+            <div class="believer-frame" id="serve-hero">
+              <div class="believer-halo"></div>
+              <img class="believer-img" id="serve-img" alt="" />
+              <div class="reply-fx" id="reply-fx"></div>
+            </div>
+            <div class="speech-bubble" id="speech-bubble">
+              <div class="bubble-tail"></div>
+              <div class="ask-meta" id="ask-meta"></div>
+              <div class="believer-stats" id="believer-stats"></div>
+              <p class="bubble-text" id="ask-text"></p>
+            </div>
+          </div>
+          <div class="skill-bar" id="skill-bar"></div>
+          <div class="reply-arc" id="reply-grid"></div>
+          <div class="tap-continue" id="tap-continue">點一下繼續 ▸</div>
+          <p class="round-label" id="round-label"></p>
+          <div class="combo-hud" id="combo-hud"></div>
+        </section>
+
+        <!-- 6 · 退駕結算 -->
+        <section class="phase" id="ph-exit">
+          <div class="center-col settle-col">
+            <div class="persona-card">
+              <div class="persona-eyebrow">本場大師人格鑑定</div>
+              <div class="persona-title" id="settle-persona-title">—</div>
+              <div class="persona-desc" id="settle-persona-desc"></div>
+            </div>
+            <div class="settle-rows" id="settle-rows"></div>
+            <div class="settle-ach" id="settle-ach"></div>
+            <div class="settle-irony" id="settle-irony"></div>
+            <div class="share-row">
+              <button class="btn-share" id="btn-share">複製結算報告</button>
+              <button class="btn-restart" id="btn-restart">再值班一次</button>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="hud-footer">
+        <button class="cta cta-glow" id="btn-start" disabled>開始值班</button>
+        <button class="cta cta-glow hidden" id="btn-prep-next" disabled>進入資格審查</button>
+        <nav class="hud-steps" id="steps">
+          <div class="step on" data-i="0"></div>
+          <div class="step" data-i="1"></div>
+          <div class="step" data-i="2"></div>
+          <div class="step" data-i="3"></div>
+          <div class="step" data-i="4"></div>
+          <div class="step" data-i="5"></div>
+        </nav>
+      </footer>
+
+      <div id="event-overlay">
+        <div class="event-orb">
+          <h4 id="evt-title"></h4>
+          <p id="evt-body"></p>
+          <div class="event-btns" id="evt-btns"></div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
