@@ -673,15 +673,12 @@ function casinoArt(gid) {
       <img class="jiao a" data-srcprobe="${CASINO_IMG.jiaoYang}" alt="" /><span class="jiao-fb a">🥠</span>
       <img class="jiao b" data-srcprobe="${CASINO_IMG.jiaoYang}" alt="" /><span class="jiao-fb b">🥠</span>
     </div>`;
-  // vip 黑骰問天：天公伯（上）與你（下）各三顆 SVG 立體骰，一個大骰盅(🥡)蓋住整列，搖盅→揭盅才看點數
+  // vip 黑骰問天：天公伯（上）與你（下）各三顆 SVG 立體骰（不用骰盅）；開獎時搖動骰子→定格
   const dice = () => [0, 1, 2].map(() => `<span class="die">${svgDie(6)}</span>`).join('');
   const side = (who, cls) => `
     <div class="dice-side ${cls}">
       <span class="dice-who">${who}</span>
-      <div class="dice-stage">
-        <div class="dice-row">${dice()}</div>
-        <div class="dice-cup">🥡</div>
-      </div>
+      <div class="dice-row">${dice()}</div>
       <span class="dice-sum"></span>
     </div>`;
   return `<div class="art-dice">${side('天公伯', 'sky')}<div class="dice-vs">VS</div>${side('你', 'you')}</div>`;
@@ -804,37 +801,43 @@ function animJiao(r, stage, done) {
   setTimeout(done, 1500);
 }
 
-/* 黑骰問天：骰盅蓋著 → 兩盅一起搖一搖 → 先揭天公伯盅、再揭你的盅（骰子不轉，揭開才看點數）。 */
+/* 黑骰問天：六顆骰一起搖（抖動 + 亂跳點數）→ 先定格天公伯、再定格你（沒有骰盅）。 */
 function animVip(r, stage, done) {
   const sky = stage.querySelector('.dice-side.sky'); const you = stage.querySelector('.dice-side.you');
   if (!sky || !you) { setTimeout(done, 100); return; }
+  const skyDice = [...sky.querySelectorAll('.die')]; const youDice = [...you.querySelectorAll('.die')];
+  const allDice = [...skyDice, ...youDice];
   const ss = sky.querySelector('.dice-sum'); const ys = you.querySelector('.dice-sum');
   if (ss) ss.textContent = ''; if (ys) ys.textContent = '';
+  allDice.forEach((d) => d.classList.remove('trip'));
 
-  // 先把結果點數設進骰子（此時被盅蓋著、看不到），並把盅蓋回去
-  const prep = (sideEl, vals, trip) => {
-    [...sideEl.querySelectorAll('.die')].forEach((d, i) => { setDieFace(d, vals[i]); d.classList.toggle('trip', !!trip); });
-    sideEl.classList.remove('opened');
-  };
-  prep(sky, r.sky, r.skyTrip); prep(you, r.you, r.youTrip);
-
-  // 1) 兩盅一起搖
-  sky.classList.add('shaking'); you.classList.add('shaking');
+  // 1) 搖骰：每顆抖動 + 每幀隨機跳點數
+  let t0 = null; const DUR = 1200;
   vibrate(20);
-  setTimeout(() => {
-    sky.classList.remove('shaking'); you.classList.remove('shaking');
-    // 2) 揭天公伯盅（先看莊家）
-    sky.classList.add('opened');
+  const tick = (ts) => {
+    if (t0 == null) t0 = ts;
+    const el = ts - t0;
+    allDice.forEach((d, i) => {
+      d.style.transform = `translateY(${Math.sin(el / 55 + i) * 7}px) rotate(${Math.sin(el / 75 + i * 2) * 9}deg)`;
+      setDieFace(d, 1 + Math.floor(Math.random() * 6));
+    });
+    if (el < DUR) requestAnimationFrame(tick);
+    else settle();
+  };
+  const settle = () => {
+    // 2) 先定格天公伯（戲劇性先看莊家）
+    skyDice.forEach((d, i) => { d.style.transform = 'none'; setDieFace(d, r.sky[i]); d.classList.toggle('trip', r.skyTrip); });
     if (ss) ss.textContent = `${r.sky[0] + r.sky[1] + r.sky[2]} 點`;
     vibrate(30);
-    // 3) 0.7s 後揭你的盅
+    // 3) 0.6s 後定格你
     setTimeout(() => {
-      you.classList.add('opened');
+      youDice.forEach((d, i) => { d.style.transform = 'none'; setDieFace(d, r.you[i]); d.classList.toggle('trip', r.youTrip); });
       if (ys) ys.textContent = `${r.you[0] + r.you[1] + r.you[2]} 點`;
       vibrate(r.mult > 0 ? 60 : 30);
-      setTimeout(done, 550);
-    }, 700);
-  }, 1000);
+      setTimeout(done, 500);
+    }, 600);
+  };
+  requestAnimationFrame(tick);
 }
 
 /* 大獎全螢幕金光接管 */
@@ -2179,21 +2182,11 @@ function injectStyles() {
   .dice-side{display:flex;flex-direction:column;align-items:center;gap:4px;width:100%}
   .dice-who{font-size:12px;font-weight:800;color:#ffe6ad;text-shadow:0 1px 3px #000;letter-spacing:1px}
   .dice-side.sky .dice-who{color:#ff9a9a}
-  /* 舞台：三顆骰在底層，一個大盅蓋在上層 */
-  .dice-stage{position:relative;display:inline-flex;align-items:center;justify-content:center}
   .dice-row{display:flex;gap:clamp(10px,4vw,24px);justify-content:center;align-items:center}
-  .die{position:relative;width:min(20vw,15vh,96px);height:min(20vw,15vh,96px)}
+  .die{position:relative;width:min(20vw,15vh,96px);height:min(20vw,15vh,96px);will-change:transform}
   .svgdie{width:100%;height:100%}
   .svgdie .pip{fill:url(#pipG)}
   .die.trip .svgdie{filter:drop-shadow(0 0 16px rgba(255,210,80,.95))}
-  /* 大骰盅(🥡 emoji)：絕對定位蓋住整列三顆骰（夠大才蓋得住全部）；搖動 = 抖；揭開 = 往上飛走淡出 */
-  .dice-cup{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);z-index:2;
-    font-size:min(68vw,46vh,330px);line-height:1;
-    filter:drop-shadow(0 10px 16px rgba(0,0,0,.6));
-    transition:transform .55s cubic-bezier(.3,.7,.25,1),opacity .55s ease}
-  .dice-side.shaking .dice-cup{animation:cupShake .11s linear infinite}
-  @keyframes cupShake{0%{transform:translate(calc(-50% - 7px),-50%) rotate(-5deg)}50%{transform:translate(calc(-50% + 8px),calc(-50% - 5px)) rotate(5deg)}100%{transform:translate(calc(-50% - 5px),-50%) rotate(-4deg)}}
-  .dice-side.opened .dice-cup{transform:translate(-50%,-175%) rotate(-12deg) scale(.9);opacity:0;pointer-events:none}
   .dice-sum{font-size:14px;font-weight:800;color:#ffd96a;min-height:18px;text-shadow:0 1px 3px #000}
   .dice-vs{font-size:13px;font-weight:900;color:rgba(255,225,190,.6);letter-spacing:3px;margin:-2px 0}
 
