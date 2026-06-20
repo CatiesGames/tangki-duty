@@ -242,7 +242,7 @@ function openBelieversScreen() {
       const l = r.life; const e = r.ending;
       const bar = (lab, v, c) => `<div class="lbar"><span>${lab}</span><i class="${c}" style="width:${Math.round(v)}%"></i></div>`;
       return `<button class="bcard" data-cid="${r.char.id}">
-        <div class="bcard-img"><img src="${r.char.img || ''}" alt="${r.char.name}" onerror="this.style.display='none'"/></div>
+        <div class="bcard-img"><img src="${asset(r.char.img || '')}" alt="${r.char.name}" onerror="this.style.display='none'"/></div>
         <div class="bcard-body">
           <div class="bcard-name">${r.char.name} <small>${r.char.label} · 來訪 ${l.visits || 0} 次</small></div>
           ${e ? `<div class="bcard-ending ${e.good ? 'good' : e.good === false ? 'bad' : ''}">${e.emoji} ${e.label}<small>${e.desc}</small></div>` : ''}
@@ -296,7 +296,7 @@ function openBelieverDetail(cid) {
   screen(`
     <div class="scr-head"><button class="scr-close" data-close-bd>‹ 返回功德堂</button><h2>${c.name}</h2><span></span></div>
     <div class="bd-wrap">
-      <div class="bd-hero"><img src="${c.img || ''}" onerror="this.style.display='none'"/></div>
+      <div class="bd-hero"><img src="${asset(c.img || '')}" onerror="this.style.display='none'"/></div>
       <div class="bd-id">${c.name}　<small>${c.label}・${c.region}・來訪 ${l.visits || 0} 次</small></div>
       <div class="bd-bars">${bar('信任', l.trust, 'b-trust')}${bar('財務', l.wealth, 'b-wealth')}${bar('感情', l.love, 'b-love')}${bar('健康', l.health, 'b-health')}</div>
       <div class="bd-logtitle">他一路被你引導的經過</div>
