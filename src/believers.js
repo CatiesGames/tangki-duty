@@ -35,7 +35,7 @@ export const CHARACTERS = [
     genPrompt: `${STYLE}, trendy Taiwanese girl in Y2K Korean streetwear, low-rise, tank top, dyed hair, posing for selfie at temple`,
   },
   {
-    id: 'influencer', name: 'Cindy 辛蒂', gender: 'female', age: 26, label: '網美',
+    id: 'influencer', name: '心迪', gender: 'female', age: 26, label: '網美',
     img: P('influencer-1.jpg'), hot: true, irreverent: 0.8,
     region: '信義', mood: '邊修圖邊問', topic: '財運',
     genPrompt: `${STYLE}, polished Taiwanese influencer, designer outfit, ring light vibe, holding phone gimbal, temple backdrop`,
@@ -53,7 +53,7 @@ export const CHARACTERS = [
     genPrompt: `${STYLE}, pretty local Taiwanese woman, casual chic, warm smile, beside temple offering table`,
   },
   {
-    id: 'ig', name: 'Vivi 薇薇', gender: 'female', age: 23, label: '限動姐',
+    id: 'ig', name: '薇朵', gender: 'female', age: 23, label: '限動姐',
     img: P('ig-1.jpg'), hot: true, irreverent: 0.85,
     region: '西門', mood: '打卡中', topic: '人際',
     genPrompt: `${STYLE}, gen-z Taiwanese girl taking instagram story, peace sign, trendy, filters vibe, temple check-in`,
@@ -177,7 +177,7 @@ export const CHARACTERS = [
   },
   // ── tier 3（rep≥45）小有名氣：藝人/民代 ──
   {
-    id: 'idol', name: 'KAYA', gender: 'female', age: 24, label: '當紅女偶像', repReq: 45,
+    id: 'idol', name: '凱亞', gender: 'female', age: 24, label: '當紅女偶像', repReq: 45,
     img: P('idol.jpg'), hot: true, irreverent: 0.5, region: '台北', mood: '戴口罩低調來', topic: '事業',
     genPrompt: `${STYLE}, Taiwanese pop idol girl incognito (cap + mask pulled down), stylish, bodyguard blurred behind, sneaking into temple`,
   },
@@ -187,7 +187,7 @@ export const CHARACTERS = [
     genPrompt: `${STYLE}, Taiwanese city councilman, campaign vest + sash, shaking-hands politician smile, supporters blurred, at temple festival`,
   },
   {
-    id: 'streamerqueen', name: '雪碧', gender: 'female', age: 26, label: '斗內女神主播', repReq: 45,
+    id: 'streamerqueen', name: '雪霏', gender: 'female', age: 26, label: '斗內女神主播', repReq: 45,
     img: P('streamerqueen.jpg'), hot: true, irreverent: 0.75, region: '台北', mood: '開實況來', topic: '財運',
     genPrompt: `${STYLE}, Taiwanese live-stream goddess, glamorous, ring light + phone on stand, lots of makeup, working the camera at temple`,
   },
@@ -219,7 +219,7 @@ export const CHARACTERS = [
     genPrompt: `${STYLE}, elderly Taiwanese conglomerate chairman, impeccable tailored suit, quiet immense power, luxury sedan + driver blurred, at temple`,
   },
   {
-    id: 'superstar', name: '天王 Jay', gender: 'male', age: 40, label: '華語天王', repReq: 75,
+    id: 'superstar', name: '天王 林帝', gender: 'male', age: 40, label: '華語天王', repReq: 75,
     img: P('superstar.jpg'), hot: false, irreverent: 0.5, region: '台北', mood: '全程戴墨鏡', topic: '感情',
     genPrompt: `${STYLE}, Taiwanese mega pop superstar, sunglasses + designer streetwear, effortless cool, fans/security blurred, slipping into temple`,
   },

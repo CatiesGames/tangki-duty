@@ -367,14 +367,14 @@ const SLOT_SYMS = ['🧙', '💰', '🪔', '🧧', '🐢', '7️⃣'];
    icon/label 顯示在扇區上；mult 是賠率；color 區分視覺；weight 決定中獎機率。 */
 /* weight 已調過：EV ≈ 0.87（房子抽 ~13%，符合「賭場 EV<1」）。順序與 wheel-face.png 圖一致，勿動 mult/順序。 */
 const WHEEL_SEGS = [
-  { icon: '🧧', label: '頭獎', mult: 8, color: '#e0301a', weight: 2, msg: '🎉 頭獎 ×8！點石成金，神明大手筆！' },
-  { icon: '💀', label: '上繳天庭', mult: 0, color: '#3a2030', weight: 30, msg: '😱 停在「上繳天庭」，香火全沒了。' },
-  { icon: '🪙', label: '小賺', mult: 1.8, color: '#c9a227', weight: 8, msg: '🙂 小賺一筆 ×1.8。' },
-  { icon: '💀', label: '上繳天庭', mult: 0, color: '#3a2030', weight: 30, msg: '😱 又是「上繳天庭」，神明今天很餓。' },
-  { icon: '🤑', label: '大豐收', mult: 3, color: '#b026ff', weight: 5, msg: '🤑 大豐收 ×3！神明賞臉！' },
-  { icon: '🪙', label: '小賺', mult: 1.8, color: '#c9a227', weight: 8, msg: '🙂 小賺一筆 ×1.8。' },
-  { icon: '😐', label: '回本', mult: 1, color: '#5a6a7a', weight: 16, msg: '😐 不賺不賠，神明說心誠就好。' },
-  { icon: '🤑', label: '大豐收', mult: 3, color: '#b026ff', weight: 5, msg: '🤑 大豐收 ×3！神明賞臉！' },
+  { icon: '🧧', label: '頭獎', mult: 8, color: '#e0301a', weight: 3, msg: '🎉 頭獎 ×8！點石成金，神明大手筆！' },
+  { icon: '💀', label: '上繳天庭', mult: 0, color: '#3a2030', weight: 26, msg: '😱 停在「上繳天庭」，香火全沒了。' },
+  { icon: '🪙', label: '小賺', mult: 1.8, color: '#c9a227', weight: 10, msg: '🙂 小賺一筆 ×1.8。' },
+  { icon: '💀', label: '上繳天庭', mult: 0, color: '#3a2030', weight: 26, msg: '😱 又是「上繳天庭」，神明今天很餓。' },
+  { icon: '🤑', label: '大豐收', mult: 3, color: '#b026ff', weight: 6, msg: '🤑 大豐收 ×3！神明賞臉！' },
+  { icon: '🪙', label: '小賺', mult: 1.8, color: '#c9a227', weight: 10, msg: '🙂 小賺一筆 ×1.8。' },
+  { icon: '😐', label: '回本', mult: 1, color: '#5a6a7a', weight: 15, msg: '😐 不賺不賠，神明說心誠就好。' },
+  { icon: '🤑', label: '大豐收', mult: 3, color: '#b026ff', weight: 7, msg: '🤑 大豐收 ×3！神明賞臉！' },
 ];
 
 /* 設施清單（每個一種玩法）。img = 設施場景圖（缺圖時 emoji+漸層 fallback）。 */
@@ -432,9 +432,9 @@ function openCasinoScreen() {
 }
 
 const ODDS_TEXT = {
-  jiao: '猜中 ×1.95（約 48% 機率）；猜錯歸零。一翻兩瞪眼。',
+  jiao: '猜中 ×2.3（約 48% 機率）；猜錯歸零。一翻兩瞪眼。',
   slot: '小獎 ×2、中獎 ×5、三神連線 Jackpot ×20！銘謝惠顧機率高。',
-  vip: '你 vs 天公伯各擲三黑骰：你出豹子（三同點）×11、點數贏 ×1.5、平手或輸或他出豹子 → 歸零。一把翻身或一把歸零。',
+  vip: '你 vs 天公伯各擲三黑骰：你出豹子（三同點）×11、點數贏 ×1.9、平手或輸或他出豹子 → 歸零。一把翻身或一把歸零。',
 };
 
 /* slot-strip.png 的符號順序（由上到下 6 格），index 對應切圖位置 */
@@ -458,16 +458,16 @@ function wireSlotIcons(el) {
 /* 老虎機中獎對照表：用「圖片符號」說明（跟轉出來的一模一樣），不用 emoji。
    combo = 符號 index 陣列；與 animSlot/playCasino 倍率一致。 */
 const SLOT_LEGEND = [
-  { combo: [5, 5, 5], label: '三個 7 連線', mult: 20, pct: 1.2 },
-  { combo: [0, 0, 0], label: '三尊財神連線', mult: 5, pct: 4 },
-  { combo: [2, 2, 2], label: '任意三個同符號', tail: '（元寶／香爐／紅包／龜…）', mult: 2, pct: 18 },
-  { combo: null, label: '不成三連・銘謝惠顧', mult: 0, pct: 77 },
+  { combo: [5, 5, 5], label: '三個 7 連線', mult: 20, pct: 2 },
+  { combo: [0, 0, 0], label: '三尊財神連線', mult: 5, pct: 5 },
+  { combo: [2, 2, 2], label: '任意三個同符號', tail: '（元寶／香爐／紅包／龜…）', mult: 2, pct: 22 },
+  { combo: null, label: '不成三連・銘謝惠顧', mult: 0, pct: 71 },
 ];
 
 /* 黑骰問天對照表（與 playCasino vip 倍率/結果一致；pct 為實測機率） */
 const VIP_LEGEND = [
   { label: '你擲出豹子', tail: '（三顆同點，如 ⚄⚄⚄）', mult: 11, pct: '2.8%', cls: 'top' },
-  { label: '你點數贏天公伯', mult: 1.5, pct: '約 43%', cls: 'win' },
+  { label: '你點數贏天公伯', mult: 1.9, pct: '約 43%', cls: 'win' },
   { label: '平手', tail: '（莊家通吃，不退本）', mult: 0, pct: '約 9%', cls: 'lose' },
   { label: '你點數輸，或天公伯擲出豹子', mult: 0, pct: '約 45%', cls: 'lose' },
 ];
@@ -866,19 +866,20 @@ function spawnCasinoSparks(host) {
 function playCasino(gid, bet) {
   const r = Math.random();
   if (gid === 'jiao') {
+    // EV ≈ 1.10（玩家略佔優，但猜錯仍全沒）：猜中 48% ×2.3
     const win = r < 0.48;
-    return win ? { payout: Math.round(bet * 1.95), mult: 1.95, msg: '🥠 聖筊！神明點頭，猜中翻倍！' } : { payout: 0, mult: 0, msg: '😩 陰筊…神明搖頭，香油上繳天庭。' };
+    return win ? { payout: Math.round(bet * 2.3), mult: 2.3, msg: '🥠 聖筊！神明點頭，猜中翻倍！' } : { payout: 0, mult: 0, msg: '😩 陰筊…神明搖頭，香油上繳天庭。' };
   }
   if (gid === 'slot') {
-    // EV ≈ 0.80（房子抽 ~20%）：×20@1.2% / ×5@4% / ×2@18% / 其餘歸零
-    if (r < 0.012) return { payout: bet * 20, mult: 20, msg: '🎰🎰🎰 三個 7 連線 JACKPOT ×20！整條街都聽到鈴聲！' };
-    if (r < 0.052) return { payout: bet * 5, mult: 5, msg: '✨ 三尊財神連線 ×5！手氣正旺！' };
-    if (r < 0.232) return { payout: bet * 2, mult: 2, msg: '🙂 三個同符號 ×2，回本還有賺。' };
+    // EV ≈ 1.09：×20@2% / ×5@5% / ×2@22% / 其餘歸零
+    if (r < 0.02) return { payout: bet * 20, mult: 20, msg: '🎰🎰🎰 三個 7 連線 JACKPOT ×20！整條街都聽到鈴聲！' };
+    if (r < 0.07) return { payout: bet * 5, mult: 5, msg: '✨ 三尊財神連線 ×5！手氣正旺！' };
+    if (r < 0.29) return { payout: bet * 2, mult: 2, msg: '🙂 三個同符號 ×2，回本還有賺。' };
     return { payout: 0, mult: 0, msg: '🎰 銘謝惠顧⋯⋯機台說你誠意不夠。' };
   }
   if (gid === 'vip') {
-    // 黑骰問天：你 vs 天公伯各擲三黑骰。你豹子 ×11；莊家豹子(你沒) → 歸零；點數你贏 ×1.5；否則(含平手) → 歸零。
-    // EV ≈ 0.95（房子抽約 5%，仍是賭場），但 ×11 豹子給足「一把翻身」的報復爽感。
+    // 黑骰問天：你 vs 天公伯各擲三黑骰。你豹子 ×11；莊家豹子(你沒) → 歸零；點數你贏 ×1.9；否則(含平手) → 歸零。
+    // EV ≈ 1.12（玩家略佔優），但 all in 仍常常全賠；×11 豹子給足「一把翻身」爽感。
     const d6 = () => 1 + Math.floor(Math.random() * 6);
     const you = [d6(), d6(), d6()];
     const sky = [d6(), d6(), d6()];
@@ -889,7 +890,7 @@ function playCasino(gid, bet) {
     let mult, msg;
     if (youTrip) { mult = 11; msg = `🎲 豹子 ${you[0]}${you[0]}${you[0]}！通殺天公伯 ×11，一把翻身！`; }
     else if (skyTrip) { mult = 0; msg = `💀 天公伯擲出豹子 ${sky[0]}${sky[0]}${sky[0]}，你滿盤皆輸。`; }
-    else if (ys > ss) { mult = 1.5; msg = `🤑 你 ${ys} 點壓過天公伯 ${ss} 點，×1.5 得手！`; }
+    else if (ys > ss) { mult = 1.9; msg = `🤑 你 ${ys} 點壓過天公伯 ${ss} 點，×1.9 得手！`; }
     else if (ys === ss) { mult = 0; msg = `😐 平手 ${ys} 點，天公伯收走——莊家通吃平手。`; }
     else { mult = 0; msg = `💀 你 ${ys} 點輸天公伯 ${ss} 點，香油全上繳。`; }
     return { payout: Math.round(bet * mult), mult, msg, you, sky, youTrip, skyTrip };
