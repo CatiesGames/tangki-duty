@@ -673,44 +673,18 @@ function casinoArt(gid) {
       <img class="jiao a" data-srcprobe="${CASINO_IMG.jiaoYang}" alt="" /><span class="jiao-fb a">🥠</span>
       <img class="jiao b" data-srcprobe="${CASINO_IMG.jiaoYang}" alt="" /><span class="jiao-fb b">🥠</span>
     </div>`;
-  // vip 黑骰問天：天公伯（上）與你（下）各三顆 SVG 立體骰，平時被「骰盅」蓋住，搖一搖→揭盅才看到點數
-  // 三顆 SVG 立體骰直接擺出（不用骰盅遮擋）；開獎時用搖動動畫後定格
-  // 一個「大骰盅」裝三顆骰子：三顆骰排成一列，上面蓋一個大盅；搖大盅→揭大盅才看到三顆點數（骰子不轉）
+  // vip 黑骰問天：天公伯（上）與你（下）各三顆 SVG 立體骰，一個大骰盅(🥡)蓋住整列，搖盅→揭盅才看點數
   const dice = () => [0, 1, 2].map(() => `<span class="die">${svgDie(6)}</span>`).join('');
   const side = (who, cls) => `
     <div class="dice-side ${cls}">
       <span class="dice-who">${who}</span>
       <div class="dice-stage">
         <div class="dice-row">${dice()}</div>
-        <div class="dice-cup">${svgBigCup()}</div>
+        <div class="dice-cup">🥡</div>
       </div>
       <span class="dice-sum"></span>
     </div>`;
   return `<div class="art-dice">${side('天公伯', 'sky')}<div class="dice-vs">VS</div>${side('你', 'you')}</div>`;
-}
-
-/* 大骰盅 — 純 SVG，黑金漆 + 龍紋感，一個倒扣的寬口深盅，蓋住整列三顆骰子。 */
-function svgBigCup() {
-  return `<svg class="svgcup" viewBox="0 0 300 210" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <defs>
-      <linearGradient id="cupBody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a3a46"/><stop offset="0.5" stop-color="#242430"/><stop offset="1" stop-color="#0e0e14"/></linearGradient>
-      <linearGradient id="cupLip" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#56565f"/><stop offset="1" stop-color="#2a2a33"/></linearGradient>
-      <radialGradient id="cupHi" cx="0.38" cy="0.18" r="0.7"><stop offset="0" stop-color="rgba(255,255,255,.18)"/><stop offset="1" stop-color="rgba(255,255,255,0)"/></radialGradient>
-    </defs>
-    <!-- 落地陰影 -->
-    <ellipse cx="150" cy="198" rx="128" ry="11" fill="rgba(0,0,0,.5)"/>
-    <!-- 盅身（倒扣深盅：圓頂 + 直筒身 + 寬口） -->
-    <path d="M30,58 Q150,8 270,58 L270,168 Q150,188 30,168 Z" fill="url(#cupBody)" stroke="#caa23a" stroke-width="3.5"/>
-    <!-- 受光高光 -->
-    <path d="M30,58 Q150,8 270,58 L270,168 Q150,188 30,168 Z" fill="url(#cupHi)"/>
-    <!-- 盅口（倒扣後在上緣，橢圓蓋頂） -->
-    <ellipse cx="150" cy="58" rx="120" ry="26" fill="url(#cupLip)" stroke="#ffd66a" stroke-width="3.5"/>
-    <ellipse cx="150" cy="58" rx="104" ry="18" fill="#0b0b10"/>
-    <!-- 金色龍紋雙飾帶 -->
-    <path d="M54,108 Q150,92 246,108" fill="none" stroke="#d9b24a" stroke-width="3.5" opacity=".85"/>
-    <path d="M60,138 Q150,124 240,138" fill="none" stroke="#b8902f" stroke-width="2.6" opacity=".7"/>
-    <text x="150" y="132" text-anchor="middle" font-size="44" fill="#ffd66a" opacity=".92" font-weight="900">乩</text>
-  </svg>`;
 }
 
 /* 正面點位（在正方面內，座標 -1..1）→ 1~6 標準排列，清楚易讀 */
@@ -2212,14 +2186,14 @@ function injectStyles() {
   .svgdie{width:100%;height:100%}
   .svgdie .pip{fill:url(#pipG)}
   .die.trip .svgdie{filter:drop-shadow(0 0 16px rgba(255,210,80,.95))}
-  /* 大骰盅：絕對定位蓋住整列三顆骰（略寬高）；搖動 = 抖；揭開 = 往上飛走淡出 */
-  .dice-cup{position:absolute;left:50%;bottom:-8%;width:112%;height:230%;
-    transform:translateX(-50%);transform-origin:50% 100%;z-index:2;
+  /* 大骰盅(🥡 emoji)：絕對定位蓋住整列三顆骰（夠大才蓋得住全部）；搖動 = 抖；揭開 = 往上飛走淡出 */
+  .dice-cup{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);z-index:2;
+    font-size:min(68vw,46vh,330px);line-height:1;
+    filter:drop-shadow(0 10px 16px rgba(0,0,0,.6));
     transition:transform .55s cubic-bezier(.3,.7,.25,1),opacity .55s ease}
-  .svgcup{width:100%;height:100%;filter:drop-shadow(0 10px 18px rgba(0,0,0,.6))}
   .dice-side.shaking .dice-cup{animation:cupShake .11s linear infinite}
-  @keyframes cupShake{0%{transform:translateX(calc(-50% - 7px)) translateY(0) rotate(-4deg)}50%{transform:translateX(calc(-50% + 8px)) translateY(-5px) rotate(4deg)}100%{transform:translateX(calc(-50% - 5px)) translateY(0) rotate(-3deg)}}
-  .dice-side.opened .dice-cup{transform:translateX(-50%) translateY(-150%) rotate(-10deg) scale(.92);opacity:0;pointer-events:none}
+  @keyframes cupShake{0%{transform:translate(calc(-50% - 7px),-50%) rotate(-5deg)}50%{transform:translate(calc(-50% + 8px),calc(-50% - 5px)) rotate(5deg)}100%{transform:translate(calc(-50% - 5px),-50%) rotate(-4deg)}}
+  .dice-side.opened .dice-cup{transform:translate(-50%,-175%) rotate(-12deg) scale(.9);opacity:0;pointer-events:none}
   .dice-sum{font-size:14px;font-weight:800;color:#ffd96a;min-height:18px;text-shadow:0 1px 3px #000}
   .dice-vs{font-size:13px;font-weight:900;color:rgba(255,225,190,.6);letter-spacing:3px;margin:-2px 0}
 
