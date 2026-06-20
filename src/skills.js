@@ -22,32 +22,6 @@
 const small = (o) => ({ tier: 'small', uses: 1, ...o });
 const ult = (o) => ({ tier: 'ult', ult: true, uses: 1, ...o });
 
-/* 狼牙棒 icon（SVG）：黑色棒身 + 整排尖刺的釘錘，斜放，參考實體狼牙棒。emoji 沒有合適的，所以自繪。 */
-const MACE_ICON = `<svg class="ico-svg" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-  <defs>
-    <linearGradient id="maceShaft" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4a4a52"/><stop offset="1" stop-color="#1c1c22"/></linearGradient>
-    <linearGradient id="maceHead" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#55555f"/><stop offset="1" stop-color="#222229"/></linearGradient>
-  </defs>
-  <g transform="rotate(38 16 16)">
-    <!-- 握把 -->
-    <rect x="14.4" y="20.5" width="3.2" height="8.5" rx="1.4" fill="url(#maceShaft)" stroke="#000" stroke-width="0.5"/>
-    <ellipse cx="16" cy="29.2" rx="2.4" ry="1.1" fill="#15151a"/>
-    <!-- 棒身（帶尖刺的釘錘） -->
-    <rect x="12" y="5" width="8" height="16" rx="3.4" fill="url(#maceHead)" stroke="#000" stroke-width="0.6"/>
-    <!-- 左右兩排尖刺 -->
-    <g fill="#2a2a31" stroke="#000" stroke-width="0.4">
-      <path d="M12 7 L8.5 8 L12 9.4 Z"/><path d="M12 11 L8 12 L12 13.4 Z"/><path d="M12 15 L8.5 16 L12 17.4 Z"/>
-      <path d="M20 7 L23.5 8 L20 9.4 Z"/><path d="M20 11 L24 12 L20 13.4 Z"/><path d="M20 15 L23.5 16 L20 17.4 Z"/>
-    </g>
-    <!-- 頂端尖刺 -->
-    <path d="M14 5 L16 1.5 L18 5 Z" fill="#2a2a31" stroke="#000" stroke-width="0.4"/>
-    <!-- 中排小釘 -->
-    <g fill="#1a1a20"><circle cx="16" cy="8.5" r="1.1"/><circle cx="16" cy="12.5" r="1.1"/><circle cx="16" cy="16.5" r="1.1"/></g>
-    <!-- 高光 -->
-    <rect x="13" y="6" width="1.6" height="13" rx="0.8" fill="rgba(255,255,255,.14)"/>
-  </g>
-</svg>`;
-
 export const SKILLS = {
   santaizi: {
     passive: { name: '陣頭氣盛', desc: '連段(combo)累積速度 +50%，衝倍率最快。', comboRate: 1.5 },
@@ -55,7 +29,7 @@ export const SKILLS = {
       small({ name: '小爆擊', icon: '🥁', desc: '下一筆香火 ×2。', kind: 'nextAnswerMult', value: 2 }),
       small({ name: '定神', icon: '🧘', desc: '下一題滿意度不會掉。', kind: 'calm' }),
       small({ name: '續氣', icon: '⚡', desc: '立刻回復 25 點元神。', kind: 'refundStamina', value: 25 }),
-      ult({ name: '狼牙棒・神威', icon: MACE_ICON, desc: '【大招】下一筆香火直接 ×6！', kind: 'nextAnswerMult', value: 6 }),
+      ult({ name: '火尖槍・神威', icon: '🔥', desc: '【大招】下一筆香火直接 ×6！', kind: 'nextAnswerMult', value: 6 }),
     ],
   },
   guan: {

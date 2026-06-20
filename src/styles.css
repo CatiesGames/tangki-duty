@@ -340,8 +340,7 @@ body.possessed .invoke-ring{border-color:var(--gold);box-shadow:0 0 60px var(--g
   background:linear-gradient(160deg,rgba(120,16,24,.85),rgba(60,6,12,.85));border:1px solid rgba(201,162,39,.5);
   color:#fff;box-shadow:0 3px 12px rgba(0,0,0,.4);transition:transform .12s,box-shadow .2s;line-height:1.15}
 .sk-chip:active{transform:scale(.93)}
-.sk-chip .sk-ico{font-size:19px;display:inline-flex;align-items:center;justify-content:center;height:1.3em}
-.sk-chip .sk-ico .ico-svg{width:1.5em;height:1.5em;filter:drop-shadow(0 1px 2px rgba(0,0,0,.6))}
+.sk-chip .sk-ico{font-size:19px}
 .sk-chip .sk-name{font-size:10.5px;font-weight:800;color:var(--gold-l);max-width:100%}
 /* 效果直接顯示在卡上（不靠 hover）*/
 .sk-chip .sk-eff{font-size:9.5px;font-weight:700;color:#ffe6a8;line-height:1.25;max-width:100%}

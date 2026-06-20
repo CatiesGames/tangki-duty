@@ -794,8 +794,8 @@ function animJiao(r, stage, done) {
   setTimeout(() => {
     [a, b].forEach((node) => { if (node) node.classList.add('landed'); });
     // 切換到結果面（圖載到才換 src，否則 fallback emoji 不影響）
-    if (a && a.classList.contains('has-img')) a.src = faceA;
-    if (b && b.classList.contains('has-img')) b.src = faceB;
+    if (a && a.classList.contains('has-img')) a.src = asset(faceA);
+    if (b && b.classList.contains('has-img')) b.src = asset(faceB);
     stage.querySelector('.art-jiao').classList.remove('tossing');
   }, 1100);
   setTimeout(done, 1500);

@@ -659,7 +659,7 @@ function nextRound() {
 
   const img = $('serve-img');
   img.classList.remove('show');
-  img.src = b.portrait;
+  img.src = asset(b.portrait);
   img.alt = b.name;
   img.onload = () => img.classList.add('show');
   if (img.complete) img.classList.add('show');
