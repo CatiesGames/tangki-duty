@@ -123,16 +123,64 @@ function mechCharge(canvas, god, cb) {
 
   return () => { canvas.removeEventListener('pointerdown', press); window.removeEventListener('pointerup', release); stop(); };
 }
+/* 狼牙棒：握把 + 圓柱棒身 + 整圈尖刺（釘錘），蓄力時棒身顏色隨 r,g,b 脈動(進紅區變紅) */
 function drawClub(ctx, cx, cy, ringR, angle, r, g, b) {
   ctx.save();
   ctx.translate(cx, cy + ringR * 0.1);
   ctx.rotate(angle);
-  ctx.fillStyle = '#6b4a2a';
-  ctx.fillRect(-6, 0, 12, ringR * 0.7);
-  ctx.fillStyle = `rgb(${r},${g},${b})`;
-  ctx.beginPath(); ctx.arc(0, -ringR * 0.02, 26, 0, TAU); ctx.fill();
-  ctx.fillStyle = '#4a3018';
-  for (let i = 0; i < 8; i++) { const a = (i / 8) * TAU; ctx.beginPath(); ctx.arc(Math.cos(a) * 26, -ringR * 0.02 + Math.sin(a) * 26, 4, 0, TAU); ctx.fill(); }
+
+  const headCy = -ringR * 0.02;   // 棒頭中心
+  const headLen = 46;             // 棒身長
+  const headW = 17;               // 棒身半寬
+  const headTop = headCy - headLen / 2;
+  const headBot = headCy + headLen / 2;
+
+  // 握把（深木色，帶握柄底盤）
+  ctx.fillStyle = '#5a3d22';
+  ctx.beginPath(); ctx.roundRect?.(-5, headBot - 2, 10, ringR * 0.62, 4); ctx.fill();
+  if (!ctx.roundRect) { ctx.fillRect(-5, headBot - 2, 10, ringR * 0.62); }
+  ctx.fillStyle = '#3a2614';
+  ctx.beginPath(); ctx.ellipse(0, headBot - 2 + ringR * 0.62, 9, 4, 0, 0, TAU); ctx.fill();
+
+  // 尖刺（先畫，被棒身蓋住底部，露出外緣）——左右各一排 + 頂端
+  ctx.fillStyle = '#1c1c20';
+  ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
+  const rows = 5;
+  for (let i = 0; i < rows; i++) {
+    const y = headTop + 6 + (headLen - 12) * (i / (rows - 1));
+    // 左刺
+    ctx.beginPath(); ctx.moveTo(-headW, y - 5); ctx.lineTo(-headW - 11, y); ctx.lineTo(-headW, y + 5); ctx.closePath(); ctx.fill(); ctx.stroke();
+    // 右刺
+    ctx.beginPath(); ctx.moveTo(headW, y - 5); ctx.lineTo(headW + 11, y); ctx.lineTo(headW, y + 5); ctx.closePath(); ctx.fill(); ctx.stroke();
+  }
+  // 頂端尖刺
+  ctx.beginPath(); ctx.moveTo(-7, headTop); ctx.lineTo(0, headTop - 13); ctx.lineTo(7, headTop); ctx.closePath(); ctx.fill(); ctx.stroke();
+
+  // 棒身（圓角矩形，顏色脈動）+ 漸層立體感
+  const grad = ctx.createLinearGradient(-headW, 0, headW, 0);
+  grad.addColorStop(0, `rgb(${Math.round(r * 1.15)},${Math.round(g * 1.15)},${Math.round(b * 1.15)})`);
+  grad.addColorStop(0.5, `rgb(${r},${g},${b})`);
+  grad.addColorStop(1, `rgb(${Math.round(r * 0.55)},${Math.round(g * 0.55)},${Math.round(b * 0.55)})`);
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  if (ctx.roundRect) ctx.roundRect(-headW, headTop, headW * 2, headLen, 9);
+  else ctx.rect(-headW, headTop, headW * 2, headLen);
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(0,0,0,.5)'; ctx.lineWidth = 1.5; ctx.stroke();
+
+  // 棒身上的釘（中排三顆，深色立體）
+  ctx.fillStyle = 'rgba(0,0,0,.45)';
+  for (let i = 0; i < 3; i++) {
+    const y = headTop + headLen * (0.28 + i * 0.22);
+    ctx.beginPath(); ctx.arc(0, y, 3.2, 0, TAU); ctx.fill();
+  }
+  // 左側高光
+  ctx.fillStyle = 'rgba(255,255,255,.22)';
+  ctx.beginPath();
+  if (ctx.roundRect) ctx.roundRect(-headW + 3, headTop + 4, 5, headLen - 8, 3);
+  else ctx.rect(-headW + 3, headTop + 4, 5, headLen - 8);
+  ctx.fill();
+
   ctx.restore();
 }
 

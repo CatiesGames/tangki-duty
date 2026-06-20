@@ -101,11 +101,7 @@ body.invoke-shaking #hud{transform:translate(var(--inv-x),var(--inv-y))}
 .stat-pill{padding:5px 14px;border-radius:99px;font-size:9px;text-align:center;background:rgba(14,4,8,.6);backdrop-filter:blur(10px);border:1px solid rgba(201,162,39,.3)}
 .stat-pill b{display:block;font-size:14px;color:var(--gold-l);font-variant-numeric:tabular-nums}
 .stat-pill span{color:rgba(255,228,194,.65)}
-/* 執務頁：頂部標題收簡（藏前綴/副標、標題縮小、統計列收起），把垂直空間讓給信眾圖 */
-body.on-serve .hud-top{padding:6px 16px 2px}
-body.on-serve .hdr-eyebrow,body.on-serve .hdr-sub{display:none}
-body.on-serve .hdr-title{font-size:clamp(18px,4.5vw,26px);margin:0}
-body.on-serve .hud-stats{display:none}/* 香火/滿意/元神 已在 serve-hud 顯示，這條重複了，收起 */
+/* 執務頁頂部標題收簡：「只在手機」做（電腦版維持豐富標題＋右上統計，不動）。見檔尾 max-width:819px 區塊。 */
 
 .hud-footer{padding:8px 16px calc(14px + env(safe-area-inset-bottom));display:flex;flex-direction:column;align-items:center;gap:10px;z-index:110;
   background:linear-gradient(180deg,transparent,rgba(8,2,6,.82) 38%)}
@@ -240,13 +236,11 @@ body.possessed .invoke-ring{border-color:var(--gold);box-shadow:0 0 60px var(--g
 .invoke-hint strong{color:var(--gold-l)}
 
 /* ── 5 · serve ── */
-#ph-serve.active{align-items:center;justify-content:center;padding:4px 10px;gap:4px}
-/* 頂部三項狀態：手機上做成纖薄膠囊橫排，省高度給信眾圖 */
-.serve-hud{display:flex;gap:6px;justify-content:center;flex-shrink:0;flex-wrap:nowrap;width:100%;max-width:460px}
-.meter-orb{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:4px 8px;border-radius:99px;text-align:center;font-size:9px;background:rgba(10,2,4,.62);backdrop-filter:blur(8px);border:1px solid rgba(255,215,0,.26);min-width:0}
-.meter-orb>span{white-space:nowrap}
-.meter-orb b{font-size:13px;color:var(--gold-l);margin:0;font-variant-numeric:tabular-nums}
-.meter-ring{display:none}/* 手機省空間：細進度條收起，數字夠看 */
+#ph-serve.active{align-items:center;justify-content:center;padding:6px 12px 6px;gap:6px}
+.serve-hud{display:flex;gap:10px;justify-content:center;flex-shrink:0;flex-wrap:wrap}
+.meter-orb{padding:7px 14px;border-radius:18px;text-align:center;font-size:9.5px;background:rgba(10,2,4,.6);backdrop-filter:blur(8px);border:1px solid rgba(255,215,0,.28);min-width:92px}
+.meter-orb b{display:block;font-size:16px;color:var(--gold-l);margin:2px 0;font-variant-numeric:tabular-nums}
+.meter-ring{height:5px;background:rgba(255,255,255,.12);border-radius:99px;overflow:hidden;margin-top:3px}
 .meter-ring i{display:block;height:100%;background:linear-gradient(90deg,var(--god-accent),var(--gold));border-radius:99px;transition:width .4s}
 .meter-ring i.low{background:linear-gradient(90deg,#c0392b,#e67e22);animation:lowPulse .8s ease-in-out infinite}
 @keyframes lowPulse{50%{opacity:.5}}
@@ -271,9 +265,9 @@ body.possessed .invoke-ring{border-color:var(--gold);box-shadow:0 0 60px var(--g
 @keyframes fxFloat{0%{opacity:0;transform:translate(-50%,12px)}12%{opacity:1}82%{opacity:1}100%{opacity:0;transform:translate(-50%,-26px)}}
 
 /* 對話氣泡：實底深色，不透花背景，字大、好讀 */
-.speech-bubble{position:relative;width:min(460px,93vw);padding:11px 18px 13px;margin-top:6px;z-index:3;flex-shrink:0;
+.speech-bubble{position:relative;width:min(460px,93vw);padding:16px 22px 18px;margin-top:8px;z-index:3;flex-shrink:0;
   background:#120308;border:1px solid rgba(255,215,0,.34);
-  border-radius:18px 18px 18px 7px;box-shadow:0 0 34px rgba(255,100,0,.14),0 14px 44px rgba(0,0,0,.6)}
+  border-radius:22px 22px 22px 8px;box-shadow:0 0 34px rgba(255,100,0,.14),0 14px 44px rgba(0,0,0,.6)}
 .bubble-tail{position:absolute;top:-11px;left:42px;width:0;height:0;border-left:14px solid transparent;border-right:14px solid transparent;border-bottom:14px solid #120308}
 .ask-meta{font-size:11px;color:rgba(255,228,196,.7);margin-bottom:8px;display:flex;flex-wrap:wrap;gap:7px;align-items:center}
 .ask-meta .tag{background:rgba(255,215,0,.2);color:var(--gold-l);padding:2px 10px;border-radius:99px;font-weight:800;font-size:10px}
@@ -289,13 +283,12 @@ body.possessed .invoke-ring{border-color:var(--gold);box-shadow:0 0 60px var(--g
 @keyframes statFlash{0%,100%{filter:none}40%{filter:brightness(1.8) saturate(1.4)}}
 .bstat i{display:block;height:4px;border-radius:99px;background:#888;transition:width .5s cubic-bezier(.2,.8,.2,1)}
 .bstat i.b-trust{background:#c9a227}.bstat i.b-wealth{background:#3fae6a}.bstat i.b-love{background:#e8638e}.bstat i.b-health{background:#4fb0d6}
-.bubble-text{font-size:15px;line-height:1.55;margin:0;color:rgba(255,242,222,.98);min-height:1.55em;max-height:24vh;overflow-y:auto}
-.bubble-text::-webkit-scrollbar{width:0}
+.bubble-text{font-size:16px;line-height:1.75;margin:0;color:rgba(255,242,222,.98);min-height:1.75em}
 /* 玩家選擇後信眾的反應：金色強調、稍大，讓人一眼看到劇情推進 */
 .bubble-text.reaction{color:var(--gold-l);font-weight:700;font-size:16.5px}
 
-.reply-arc{display:flex;flex-direction:column;gap:6px;width:min(470px,94vw);margin:7px auto 0;flex-shrink:0}
-.reply-btn{text-align:left;padding:9px 14px;border-radius:14px;font-size:13px;line-height:1.4;color:rgba(255,240,218,.96);font-family:var(--serif);transition:transform .15s,border-color .15s,box-shadow .15s;
+.reply-arc{display:flex;flex-direction:column;gap:8px;width:min(470px,94vw);margin:10px auto 0;flex-shrink:0}
+.reply-btn{text-align:left;padding:12px 16px;border-radius:16px;font-size:13px;line-height:1.5;color:rgba(255,240,218,.96);font-family:var(--serif);transition:transform .15s,border-color .15s,box-shadow .15s;
   background:linear-gradient(160deg,rgba(26,9,13,.7),rgba(8,2,6,.55));border:1px solid rgba(255,215,0,.26)}
 .reply-btn:hover{border-color:var(--gold-l);transform:translateX(6px);box-shadow:0 0 18px rgba(255,215,0,.14)}
 .reply-btn .rl{font-size:10px;color:var(--gold-l);display:block;margin-bottom:3px;letter-spacing:1px;opacity:.85;font-family:var(--hand)}
@@ -342,17 +335,17 @@ body.possessed .invoke-ring{border-color:var(--gold);box-shadow:0 0 60px var(--g
 /* 神明技能列：3 小招 + 1 大招。置中、在對話氣泡與神諭選項之間，桌機/手機都不擋元素 */
 .skill-bar{display:flex;justify-content:center;align-items:stretch;gap:6px;flex-shrink:0;
   width:min(470px,94vw);margin:4px auto 2px;flex-wrap:nowrap}
-.sk-chip{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:1px;
-  padding:5px 4px;border-radius:12px;cursor:pointer;font-family:inherit;text-align:center;
+.sk-chip{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:7px 4px 6px;border-radius:13px;cursor:pointer;font-family:inherit;text-align:center;
   background:linear-gradient(160deg,rgba(120,16,24,.85),rgba(60,6,12,.85));border:1px solid rgba(201,162,39,.5);
-  color:#fff;box-shadow:0 3px 12px rgba(0,0,0,.4);transition:transform .12s,box-shadow .2s;line-height:1.1}
+  color:#fff;box-shadow:0 3px 12px rgba(0,0,0,.4);transition:transform .12s,box-shadow .2s;line-height:1.15}
 .sk-chip:active{transform:scale(.93)}
-.sk-chip .sk-ico{font-size:16px;display:inline-flex;align-items:center;justify-content:center;height:1.3em}
+.sk-chip .sk-ico{font-size:19px;display:inline-flex;align-items:center;justify-content:center;height:1.3em}
 .sk-chip .sk-ico .ico-svg{width:1.5em;height:1.5em;filter:drop-shadow(0 1px 2px rgba(0,0,0,.6))}
-.sk-chip .sk-name{font-size:10px;font-weight:800;color:var(--gold-l);max-width:100%}
-/* 效果直接顯示在卡上（不靠 hover）；手機省高度只留一行 */
-.sk-chip .sk-eff{font-size:9px;font-weight:700;color:#ffe6a8;line-height:1.2;max-width:100%;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.sk-chip .sk-uses{font-size:8.5px;color:rgba(255,235,200,.6)}
+.sk-chip .sk-name{font-size:10.5px;font-weight:800;color:var(--gold-l);max-width:100%}
+/* 效果直接顯示在卡上（不靠 hover）*/
+.sk-chip .sk-eff{font-size:9.5px;font-weight:700;color:#ffe6a8;line-height:1.25;max-width:100%}
+.sk-chip .sk-uses{font-size:8.5px;color:rgba(255,235,200,.6);margin-top:1px}
 .sk-chip.ult{flex:1.25 1 0;border-color:#ffb020;
   background:linear-gradient(160deg,rgba(200,60,20,.95),rgba(120,20,8,.95));
   box-shadow:0 3px 14px rgba(0,0,0,.5),0 0 16px rgba(255,140,40,.55);animation:skillGlow 1.6s ease-in-out infinite}
@@ -453,6 +446,28 @@ body.exiting-possession .believer-float{opacity:0!important;transform:translateY
   .sk-chip .sk-uses{font-size:9.5px}
   .serve-hud{position:fixed;top:96px;left:24px;flex-direction:column;z-index:115}
   .ritual-canvas{height:min(380px,48vh)}
+}
+
+/* ══ 只在手機（窄螢幕）：執務頁壓縮頂部與狀態，把垂直空間讓給信眾圖；電腦版不受影響 ══ */
+@media(max-width:819px){
+  /* 頂部標題收簡 */
+  body.on-serve .hud-top{padding:6px 16px 2px}
+  body.on-serve .hdr-eyebrow,body.on-serve .hdr-sub{display:none}
+  body.on-serve .hdr-title{font-size:clamp(18px,4.5vw,26px);margin:0}
+  body.on-serve .hud-stats{display:none}/* 與 serve-hud 重複，手機收起 */
+  /* 三項狀態做成纖薄膠囊橫排 */
+  #ph-serve.active{padding:4px 10px;gap:4px}
+  .serve-hud{gap:6px;flex-wrap:nowrap;width:100%;max-width:460px}
+  .meter-orb{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:4px 8px;border-radius:99px;font-size:9px;min-width:0}
+  .meter-orb b{display:inline;font-size:13px;margin:0}
+  .meter-orb>span{white-space:nowrap}
+  .meter-ring{display:none}/* 手機省高度：細進度條收起 */
+  /* 對話氣泡 + 神諭按鈕收緊 */
+  .speech-bubble{padding:11px 18px 13px;margin-top:6px;border-radius:18px 18px 18px 7px}
+  .bubble-text{font-size:15px;line-height:1.55;max-height:24vh;overflow-y:auto}
+  .bubble-text::-webkit-scrollbar{width:0}
+  .reply-arc{gap:6px;margin:7px auto 0}
+  .reply-btn{padding:9px 14px;border-radius:14px;line-height:1.4}
 }
 
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
