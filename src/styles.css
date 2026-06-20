@@ -254,11 +254,11 @@ body.possessed .invoke-ring{border-color:var(--gold);box-shadow:0 0 60px var(--g
 .center-stage{flex:1 1 0;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;width:100%;max-width:620px;position:relative}
 /* 信眾圖：保證一個下限高度，短螢幕也看得到（不再被按鈕擠到剩一條） */
 .believer-frame{position:relative;flex:1 1 auto;min-height:26vh;width:100%;z-index:2;overflow:hidden}
-/* 四邊羽化：單一 radial 遮罩，中心實、向四周提早淡出 → 邊緣柔化融入背景 */
-.believer-img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center bottom;opacity:0;transition:opacity .5s ease;
+/* 四邊羽化：遮罩中心對齊圖片置中位置（object-position 也置中），避免在寬/高螢幕下圖落在透明區→整個看不見 */
+.believer-img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center center;opacity:0;transition:opacity .5s ease;
   filter:drop-shadow(0 14px 44px rgba(0,0,0,.7));
-  -webkit-mask-image:radial-gradient(ellipse 70% 74% at 50% 48%, #000 38%, rgba(0,0,0,.85) 60%, transparent 90%);
-  mask-image:radial-gradient(ellipse 70% 74% at 50% 48%, #000 38%, rgba(0,0,0,.85) 60%, transparent 90%)}
+  -webkit-mask-image:radial-gradient(ellipse 78% 82% at 50% 50%, #000 50%, rgba(0,0,0,.85) 70%, transparent 96%);
+  mask-image:radial-gradient(ellipse 78% 82% at 50% 50%, #000 50%, rgba(0,0,0,.85) 70%, transparent 96%)}
 .believer-img.show{opacity:1;animation:believerIn .6s ease}
 @keyframes believerIn{from{transform:translateY(16px) scale(.97)}to{transform:none}}
 .believer-halo{position:absolute;left:50%;top:42%;width:min(420px,90%);aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,rgba(255,215,0,.14) 0%,transparent 62%);pointer-events:none;animation:haloPulse 3s ease-in-out infinite}
@@ -347,7 +347,8 @@ body.possessed .invoke-ring{border-color:var(--gold);box-shadow:0 0 60px var(--g
   background:linear-gradient(160deg,rgba(120,16,24,.85),rgba(60,6,12,.85));border:1px solid rgba(201,162,39,.5);
   color:#fff;box-shadow:0 3px 12px rgba(0,0,0,.4);transition:transform .12s,box-shadow .2s;line-height:1.1}
 .sk-chip:active{transform:scale(.93)}
-.sk-chip .sk-ico{font-size:16px}
+.sk-chip .sk-ico{font-size:16px;display:inline-flex;align-items:center;justify-content:center;height:1.3em}
+.sk-chip .sk-ico .ico-svg{width:1.5em;height:1.5em;filter:drop-shadow(0 1px 2px rgba(0,0,0,.6))}
 .sk-chip .sk-name{font-size:10px;font-weight:800;color:var(--gold-l);max-width:100%}
 /* 效果直接顯示在卡上（不靠 hover）；手機省高度只留一行 */
 .sk-chip .sk-eff{font-size:9px;font-weight:700;color:#ffe6a8;line-height:1.2;max-width:100%;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
