@@ -675,35 +675,41 @@ function casinoArt(gid) {
     </div>`;
   // vip 黑骰問天：天公伯（上）與你（下）各三顆 SVG 立體骰，平時被「骰盅」蓋住，搖一搖→揭盅才看到點數
   // 三顆 SVG 立體骰直接擺出（不用骰盅遮擋）；開獎時用搖動動畫後定格
-  // 每顆 SVG 骰各自被一個「骰盅」(紙盒)蓋住；搖盅→揭盅才看到點數（骰子不轉）
-  const dice = () => [0, 1, 2].map(() =>
-    `<span class="die"><span class="die-face">${svgDie(6)}</span><span class="die-cup">${svgCup()}</span></span>`).join('');
+  // 一個「大骰盅」裝三顆骰子：三顆骰排成一列，上面蓋一個大盅；搖大盅→揭大盅才看到三顆點數（骰子不轉）
+  const dice = () => [0, 1, 2].map(() => `<span class="die">${svgDie(6)}</span>`).join('');
   const side = (who, cls) => `
     <div class="dice-side ${cls}">
       <span class="dice-who">${who}</span>
-      <div class="dice-row">${dice()}</div>
+      <div class="dice-stage">
+        <div class="dice-row">${dice()}</div>
+        <div class="dice-cup">${svgBigCup()}</div>
+      </div>
       <span class="dice-sum"></span>
     </div>`;
   return `<div class="art-dice">${side('天公伯', 'sky')}<div class="dice-vs">VS</div>${side('你', 'you')}</div>`;
 }
 
-/* 骰盅（紙盒式搖盅）— 純 SVG，黑金漆 + 龍紋感，整排蓋住三顆骰。 */
-function svgCup() {
-  return `<svg class="svgcup" viewBox="0 0 120 96" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+/* 大骰盅 — 純 SVG，黑金漆 + 龍紋感，一個倒扣的寬口深盅，蓋住整列三顆骰子。 */
+function svgBigCup() {
+  return `<svg class="svgcup" viewBox="0 0 300 210" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
     <defs>
-      <linearGradient id="cupBody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a2a33"/><stop offset="1" stop-color="#101015"/></linearGradient>
-      <linearGradient id="cupLip" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4a4a55"/><stop offset="1" stop-color="#23232b"/></linearGradient>
+      <linearGradient id="cupBody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a3a46"/><stop offset="0.5" stop-color="#242430"/><stop offset="1" stop-color="#0e0e14"/></linearGradient>
+      <linearGradient id="cupLip" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#56565f"/><stop offset="1" stop-color="#2a2a33"/></linearGradient>
+      <radialGradient id="cupHi" cx="0.38" cy="0.18" r="0.7"><stop offset="0" stop-color="rgba(255,255,255,.18)"/><stop offset="1" stop-color="rgba(255,255,255,0)"/></radialGradient>
     </defs>
-    <ellipse cx="60" cy="90" rx="46" ry="6" fill="rgba(0,0,0,.45)"/>
-    <!-- 盅身（上窄下寬倒梯形紙盒） -->
-    <path d="M22,26 L98,26 L92,86 Q60,92 28,86 Z" fill="url(#cupBody)" stroke="#caa23a" stroke-width="2"/>
-    <!-- 盅口（橢圓蓋緣） -->
-    <ellipse cx="60" cy="26" rx="38" ry="10" fill="url(#cupLip)" stroke="#ffd66a" stroke-width="2.4"/>
-    <ellipse cx="60" cy="26" rx="30" ry="6.5" fill="#0c0c11"/>
-    <!-- 金色龍紋飾帶 -->
-    <path d="M30,52 Q60,44 90,52" fill="none" stroke="#d9b24a" stroke-width="2.2" opacity=".85"/>
-    <path d="M33,64 Q60,57 87,64" fill="none" stroke="#b8902f" stroke-width="1.6" opacity=".7"/>
-    <text x="60" y="62" text-anchor="middle" font-size="15" fill="#ffd66a" opacity=".9" font-weight="900">乩</text>
+    <!-- 落地陰影 -->
+    <ellipse cx="150" cy="198" rx="128" ry="11" fill="rgba(0,0,0,.5)"/>
+    <!-- 盅身（倒扣深盅：圓頂 + 直筒身 + 寬口） -->
+    <path d="M30,58 Q150,8 270,58 L270,168 Q150,188 30,168 Z" fill="url(#cupBody)" stroke="#caa23a" stroke-width="3.5"/>
+    <!-- 受光高光 -->
+    <path d="M30,58 Q150,8 270,58 L270,168 Q150,188 30,168 Z" fill="url(#cupHi)"/>
+    <!-- 盅口（倒扣後在上緣，橢圓蓋頂） -->
+    <ellipse cx="150" cy="58" rx="120" ry="26" fill="url(#cupLip)" stroke="#ffd66a" stroke-width="3.5"/>
+    <ellipse cx="150" cy="58" rx="104" ry="18" fill="#0b0b10"/>
+    <!-- 金色龍紋雙飾帶 -->
+    <path d="M54,108 Q150,92 246,108" fill="none" stroke="#d9b24a" stroke-width="3.5" opacity=".85"/>
+    <path d="M60,138 Q150,124 240,138" fill="none" stroke="#b8902f" stroke-width="2.6" opacity=".7"/>
+    <text x="150" y="132" text-anchor="middle" font-size="44" fill="#ffd66a" opacity=".92" font-weight="900">乩</text>
   </svg>`;
 }
 
@@ -737,10 +743,9 @@ function svgDie(n) {
     <g filter="url(#pipSh)">${pips}</g>
   </svg>`;
 }
-/* 把一顆 .die 的正面設成指定點數（只改 .die-face，不動上面的骰盅） */
+/* 把一顆 .die 設成指定點數（重畫該顆 SVG 立體骰） */
 function setDieFace(dieEl, n) {
-  const face = dieEl && (dieEl.querySelector('.die-face') || dieEl);
-  if (face) face.innerHTML = svgDie(n);
+  if (dieEl) dieEl.innerHTML = svgDie(n);
 }
 
 /* ── 動畫：落在預先算好的結果（mult 決定停的位置） ── */
@@ -2195,27 +2200,26 @@ function injectStyles() {
   .landed{animation:jiaoLand .3s ease}
   @keyframes jiaoLand{0%{transform:translateY(-12px)}60%{transform:translateY(4px)}100%{transform:translateY(0)}}
 
-  /* 黑骰問天：三顆 SVG 骰被骰盅蓋住，搖一搖→揭盅看點數（骰子不轉） */
+  /* 黑骰問天：一個大骰盅裝三顆骰，搖大盅→揭大盅看三顆點數（骰子不轉） */
   .art-dice{display:flex;flex-direction:column;align-items:center;gap:clamp(4px,1.5vw,10px);width:100%}
   .dice-side{display:flex;flex-direction:column;align-items:center;gap:4px;width:100%}
   .dice-who{font-size:12px;font-weight:800;color:#ffe6ad;text-shadow:0 1px 3px #000;letter-spacing:1px}
   .dice-side.sky .dice-who{color:#ff9a9a}
+  /* 舞台：三顆骰在底層，一個大盅蓋在上層 */
+  .dice-stage{position:relative;display:inline-flex;align-items:center;justify-content:center}
   .dice-row{display:flex;gap:clamp(10px,4vw,24px);justify-content:center;align-items:center}
-  /* 每顆骰：正面在底層、自己的骰盅蓋在上層 */
   .die{position:relative;width:min(20vw,15vh,96px);height:min(20vw,15vh,96px)}
-  .die-face{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
   .svgdie{width:100%;height:100%}
   .svgdie .pip{fill:url(#pipG)}
   .die.trip .svgdie{filter:drop-shadow(0 0 16px rgba(255,210,80,.95))}
-  /* 骰盅：蓋住整顆骰（略大）；搖動 = 抖；揭開 = 往上飛走淡出 */
-  .die-cup{position:absolute;left:50%;top:50%;width:124%;height:132%;
-    transform:translate(-50%,-50%);transform-origin:50% 85%;z-index:2;
-    transition:transform .5s cubic-bezier(.3,.7,.25,1),opacity .5s ease}
-  .svgcup{width:100%;height:100%;filter:drop-shadow(0 8px 14px rgba(0,0,0,.6))}
-  .dice-side.shaking .die-cup{animation:cupShake .1s linear infinite}
-  @keyframes cupShake{0%{transform:translate(calc(-50% - 5px),-50%) rotate(-6deg)}50%{transform:translate(calc(-50% + 6px),calc(-50% - 3px)) rotate(6deg)}100%{transform:translate(calc(-50% - 4px),-50%) rotate(-5deg)}}
-  .dice-side.shaking .die-cup:nth-child(2){animation-delay:.05s}
-  .dice-side.opened .die-cup{transform:translate(-50%,-185%) rotate(-14deg) scale(.88);opacity:0;pointer-events:none}
+  /* 大骰盅：絕對定位蓋住整列三顆骰（略寬高）；搖動 = 抖；揭開 = 往上飛走淡出 */
+  .dice-cup{position:absolute;left:50%;bottom:-8%;width:112%;height:230%;
+    transform:translateX(-50%);transform-origin:50% 100%;z-index:2;
+    transition:transform .55s cubic-bezier(.3,.7,.25,1),opacity .55s ease}
+  .svgcup{width:100%;height:100%;filter:drop-shadow(0 10px 18px rgba(0,0,0,.6))}
+  .dice-side.shaking .dice-cup{animation:cupShake .11s linear infinite}
+  @keyframes cupShake{0%{transform:translateX(calc(-50% - 7px)) translateY(0) rotate(-4deg)}50%{transform:translateX(calc(-50% + 8px)) translateY(-5px) rotate(4deg)}100%{transform:translateX(calc(-50% - 5px)) translateY(0) rotate(-3deg)}}
+  .dice-side.opened .dice-cup{transform:translateX(-50%) translateY(-150%) rotate(-10deg) scale(.92);opacity:0;pointer-events:none}
   .dice-sum{font-size:14px;font-weight:800;color:#ffd96a;min-height:18px;text-shadow:0 1px 3px #000}
   .dice-vs{font-size:13px;font-weight:900;color:rgba(255,225,190,.6);letter-spacing:3px;margin:-2px 0}
 
