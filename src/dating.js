@@ -148,7 +148,7 @@ export const TARGETS = [
     },
   },
   {
-    id: 't-hana', name: 'Hana', age: 25, label: '日系藥師', region: '中山區', img: '/dating/date-girl-5.jpg',
+    id: 't-hana', name: 'Hana', age: 25, label: '日系藥師', region: '中山區', img: '/dating/date-girl-5.jpg', lowkey: true,
     type: 'sincere',
     bio: '個性慢熟，喜歡有質感的小日子。比起名牌，我更在意一頓好好的飯——但要是真的好的那種喔。🍽️',
     gate: { test: () => true, hint: '她沒有很物質，只要你願意好好請一頓飯', clue: '（這位門檻很低——她要的是誠意，不是行頭。）' },
@@ -313,7 +313,7 @@ export const TARGETS = [
   },
   // ── 清純／幼態系（韓團感、看起來像高中生～大學生） ──
   {
-    id: 't-mio', name: '小米歐', age: 19, label: '清純系大一生', region: '師大', img: '/dating/date-mio.jpg',
+    id: 't-mio', name: '小米歐', age: 19, label: '清純系大一生', region: '師大', img: '/dating/date-mio.jpg', lowkey: true,
     type: 'sincere',
     bio: '剛上大學，還在摸索世界～喜歡奶茶、貼紙、跟很溫柔的人。學長你看起來好可靠喔☺️（其實有點想要那種戴起來會發光的小東西）',
     gate: { test: (o) => has(o, 'jewelry-'), hint: '「戴起來會發光的小東西」＝一件像樣的金飾', clue: '她單純歸單純，但也偷偷期待一件閃閃的小禮物。' },
@@ -341,7 +341,7 @@ export const TARGETS = [
     },
   },
   {
-    id: 't-shian', name: '林思涵', age: 17, label: '高三生・鄰家妹', region: '永和', img: '/dating/date-shian.jpg',
+    id: 't-shian', name: '林思涵', age: 17, label: '高三生・鄰家妹', region: '永和', img: '/dating/date-shian.jpg', lowkey: true,
     type: 'sincere',
     bio: '高三快考試了，壓力好大🥺 都靠追星跟手搖撐著。喜歡會聽我說話、偶爾請我喝飲料的哥哥（最近好想要一杯要排隊的那種…）',
     gate: { test: () => true, hint: '她要的很簡單——願意聽她說話、請她喝飲料', clue: '（她門檻很低，要的是陪伴和一點點心意。）' },

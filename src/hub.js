@@ -1595,14 +1595,20 @@ function pickChatOpt(t, opt, el) {
 
   if (opt.confess) { persist(); return confessSuccess(t); }
 
-  // 好感度：放慢推進，聊夠多輪才在一起。一般回話 +1；冷淡倒扣；送禮/花錢才明顯加成。
+  // 浮誇花費(flashy)碰上「低調/清純」對象 → 不是討喜而是嚇到：好感倒扣、用嚇到台詞。
+  //   對拜金型則相反，浮誇才討喜（照常大加分）。這讓「150 貼心」與「50 萬浮誇」是質的差異，不只是數值。
+  const backfired = opt.flashy && t.lowkey;
+
+  // 好感度：一般回話 +1；冷淡倒扣；送禮/花錢明顯加成；浮誇嚇到則倒扣。
   let delta = opt.aff != null ? Math.sign(opt.aff) * Math.max(1, Math.round(Math.abs(opt.aff) / 2)) : 1;
   if (opt.aff === 0) delta = 0;
   if (c.amount > 0) delta += 4;
   if (opt.gift) delta += 8;
+  if (opt.flashy && !t.lowkey) delta += 4; // 拜金/愛排場：浮誇額外討喜
+  if (backfired) delta = -6;               // 清純被嚇到：直接倒扣
   d.aff[t.id] = Math.max(0, Math.min(120, affOf(t.id) + delta));
-  // 連續冷淡計數：選到負好感累計，暖場/送禮歸零。連 3 次冷淡 → 對方心冷，提早壞結局收場。
-  d.coldStreak[t.id] = (opt.aff != null && opt.aff < 0) ? (d.coldStreak[t.id] || 0) + 1 : 0;
+  // 連續冷淡計數：選到負好感(含被嚇到)累計，暖場/送禮歸零。連 3 次 → 對方心冷，提早壞結局。
+  d.coldStreak[t.id] = (delta < 0) ? (d.coldStreak[t.id] || 0) + 1 : 0;
   const coldOut = d.coldStreak[t.id] >= 3;
   persist();
   if (delta > 0) vibrate(12);
@@ -1615,8 +1621,8 @@ function pickChatOpt(t, opt, el) {
   const delay = 700 + Math.floor(Math.random() * 1100);
   setTimeout(() => {
     typingNode?.remove();
-    // ① 對方先「針對你選的」切題回應
-    pushHist(t.id, { who: 'them', text: opt.reply || genericReply(opt) });
+    // ① 對方先「針對你選的」切題回應（浮誇嚇到 → 用嚇到台詞）
+    pushHist(t.id, { who: 'them', text: backfired ? (opt.flashyReply || '欸…你幹嘛突然這麼大手筆，嚇到我了啦😨 你是不是別有目的？') : (opt.reply || genericReply(opt)) });
     if (opt.replyPic) pushHist(t.id, { who: 'them', text: '', pic: nextSelfie(t) });
     // ② 連續冷淡才收壞結局（有逐句失望預兆，不是無預警）
     if (coldOut) { triggerDatingEnding(t); return; }

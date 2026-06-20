@@ -717,7 +717,8 @@ export const CONVO_D = {
       { units: [
         { them: '學長…我們是不是該確定關係了呀？人家好緊張喔🥹', opts: [
           { label: '送妳那件會發光的小禮物,正式跟妳告白', costTier:'gift', aff: 5, reply: '欸欸學長你竟然準備了禮物還跟我告白！！我…我願意啦😭❤️' },
-          { label: '再讓學長準備一下,會給妳的', aff: 1, reply: '好～我等學長，但是不要讓我等太久喔🥺' },
+          { label: '直接砸大錢包場辦超浮誇告白', costTier:'party', flashy: true, aff: 4, reply: '哇學長你也太浪漫了吧！！😭❤️',
+            flashyReply: '欸…學長你怎麼突然砸這麼多錢😨 我們才剛認識欸，你這樣我會怕…是不是想要什麼？' },
           { label: '我們現在這樣不好嗎', aff: -1, reply: '可是…我想要正式跟學長在一起嘛😞' },
         ] },
         { them: '我把學長設成手機桌布了，這樣會不會太超過呀😳', opts: [
@@ -1140,8 +1141,9 @@ export const CONVO_D = {
       // stage 3 快在一起：鄰家妹告白
       { units: [
         { them: '哥哥…我們是不是該確定關係了呀？我好緊張喔🥹', opts: [
-          { label: '帶妳吃頓好的,認真跟妳說我的心意', costTier:'meal', aff: 5, reply: '欸欸哥哥你好正式喔！！我…我願意當你女朋友啦😭❤️' },
-          { label: '請妳喝那杯排隊的,邊喝邊談', costTier:'drink', aff: 4, reply: '嗚～哥哥連這個都記得，我覺得自己好被珍惜🥺💕' },
+          { label: '請妳喝那杯排隊的,邊喝邊認真告白', costTier:'drink', aff: 5, reply: '嗚～就一杯飲料卻記了這麼久…哥哥我願意當你女朋友啦😭❤️' },
+          { label: '直接包場辦排場,給妳超浮誇的告白', costTier:'party', flashy: true, aff: 4, reply: '欸欸哥哥也太浪漫了吧！！😭❤️',
+            flashyReply: '欸…哥哥你哪來這麼多錢包場啊😨 我只是個高中生欸…你這樣我反而會怕，是不是別有目的？' },
           { label: '我們現在這樣不好嗎', aff: -1, reply: '可是…我想正式當哥哥的女朋友嘛😞' },
         ] },
         { them: '我把哥哥的訊息都截圖收藏了，這樣會不會太誇張呀😳', opts: [
