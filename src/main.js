@@ -748,7 +748,11 @@ function showStage() {
     const btn = document.createElement('button');
     btn.className = 'reply-btn';
     btn.innerHTML = `<span class="rl">${PERSONAS[opt.persona].emoji} ${opt.personaLabel}</span>${opt.text}`;
-    btn.addEventListener('click', () => pickReply(opt, btn));
+    // 擋穿透：若這次點擊其實是「點繼續」那一下的尾巴（剛推進 400ms 內），忽略，避免被自動選掉
+    btn.addEventListener('click', () => {
+      if (Date.now() < justAdvancedUntil) return;
+      pickReply(opt, btn);
+    });
     grid.appendChild(btn);
   });
 }
@@ -914,36 +918,31 @@ function showTycoonWindfall(win, done) {
   try { window.__casinoWin?.(big); } catch { /* noop */ }
 }
 
+// 剛推進完的短暫鎖：防止「繼續」那一下手勢穿透到剛渲染出來的下一題選項
+let justAdvancedUntil = 0;
+
 /* 在執務區顯示「點一下繼續」並等待點擊；點了才呼叫 cb。
-   ⚠️ 為什麼這樣寫：信眾反應後選項會清空，舊版只在底部放一條小提示，
-   手機上常被誤以為卡住。改成「在原本選項位置補一顆明顯的整排繼續鈕」，
-   點該鈕、底部提示、或畫面任一處皆可推進，確保一定點得到。 */
+   ⚠️ 只用「一顆整排繼續鈕」推進——不再掛整頁 pointerdown 監聽，
+   因為那會讓同一次點擊既觸發繼續、又穿透到剛渲染的下一題選項（手機上會直接幫你選掉第一個）。 */
 function waitTap(cb) {
   let done = false;
   const hint = $('tap-continue');
   const grid = $('reply-grid');
-  // 在選項區放一顆顯眼的整排「繼續」鈕（選項剛被清空，這裡正是手指預期的位置）
-  let contBtn = null;
-  if (grid) {
-    grid.innerHTML = '';
-    contBtn = document.createElement('button');
-    contBtn.className = 'reply-btn continue-btn';
-    contBtn.innerHTML = '<span class="rl">▸ 點此繼續</span>聽聽信眾怎麼說 ⋯⋯';
-    grid.appendChild(contBtn);
-  }
-  if (hint) hint.classList.add('show');
+  if (hint) hint.classList.remove('show'); // 統一只用按鈕，移除重複的底部提示，避免看起來像兩個動作
+  if (!grid) { setTimeout(cb, 600); return; }
+  grid.innerHTML = '';
+  const contBtn = document.createElement('button');
+  contBtn.className = 'reply-btn continue-btn';
+  contBtn.textContent = '點一下繼續 ▸';
+  grid.appendChild(contBtn);
 
-  const go = (e) => {
+  const go = () => {
     if (done) return;
     done = true;
-    e?.stopPropagation();
-    if (hint) hint.classList.remove('show');
-    document.removeEventListener('pointerdown', go, true);
+    justAdvancedUntil = Date.now() + 400; // 接下來 400ms 內、剛渲染的選項不接受點擊（擋穿透）
     cb();
   };
-  // 繼續鈕可立即點；整頁點擊給打字機一點時間再開放，避免手滑略過
-  contBtn?.addEventListener('click', go);
-  setTimeout(() => { if (!done) document.addEventListener('pointerdown', go, true); }, 350);
+  contBtn.addEventListener('click', go);
 }
 
 function showReplyFx(opt) {
