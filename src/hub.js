@@ -960,7 +960,21 @@ export function openUpgradeScreen() {
  *    左滑過的人，要等整副牌都看完才會重新洗回來。
  *  好友 tab：右滑配對到的人；接受了的可以進聊天（選項式對話樹）。
  */
-function ds() { const s = getSave(); s.dating ||= {}; const d = s.dating; d.passed ||= []; d.liked ||= []; d.accepted ||= []; d.partners ||= []; d.blocked ||= []; d.clingers ||= []; d.aff ||= {}; d.seen ||= {}; d.pokes ||= []; d.history ||= {}; d.endings ||= {}; d.coldStreak ||= {}; d.scamAsk ||= {}; d.pokeCooldown ||= {}; return d; }
+function ds() { const s = getSave(); s.dating ||= {}; const d = s.dating; d.passed ||= []; d.liked ||= []; d.accepted ||= []; d.partners ||= []; d.blocked ||= []; d.clingers ||= []; d.aff ||= {}; d.seen ||= {}; d.pokes ||= []; d.history ||= {}; d.endings ||= {}; d.coldStreak ||= {}; d.scamAsk ||= {}; d.pokeCooldown ||= {}; d.spentOn ||= {}; return d; }
+
+/* 拜金/詐騙型「好結局」門檻：光是好感高、櫃子裡剛好有件便宜金飾還不夠——
+   你得真的「在她身上花過」夠份量的錢（送禮/花費），她才認你。
+   真心型(sincere)不受此限（好感為主，花錢只是加分）。
+   spentOn[id] 累積你在這位對象身上實際花掉/送出的價值。 */
+const GOLD_WIN_SPEND = 200000; // 拜金型至少花這麼多在她身上才算「真的攻略」
+function wonHer(t) {
+  const id = t.id; const d = ds();
+  const aff = affOf(id);
+  const matched = tryMatch(t, getSave().owned);
+  if (t.type === 'scammer') return endingFor(t, { aff, matched, confessed: true })?.good; // 詐騙另有邏輯（救他上岸）
+  if (t.type === 'golddigger') return aff >= 100 && matched && (d.spentOn[id] || 0) >= GOLD_WIN_SPEND;
+  return endingFor(t, { aff, matched, confessed: true })?.good; // sincere：照原本
+}
 
 /* ── 花費合理化：選項的 cost 要對得上「實際在做什麼」，不再一律 12000 ──
  * convo 裡的選項可用以下方式表達花費（resolveCost 統一解析成實際金額）：
@@ -1541,9 +1555,9 @@ function pushNextPrompt(t) {
       return true;
     }
   }
-  // 2) 全聊完了：只有「現在收會是好結局」(好感達標、拜金/詐騙還要行頭) 才結束；
-  //    否則重洗續聊，讓玩家繼續把好感聊上去或去備行頭——不突然壞結局。
-  const wouldBeGood = endingFor(t, { aff: affOf(id), matched: tryMatch(t, getSave().owned), confessed: true })?.good;
+  // 2) 全聊完了：只有「現在收會是好結局」才結束（拜金型還得真的花夠錢在她身上）；
+  //    否則重洗續聊，讓玩家繼續把好感聊上去或去備行頭/花錢——不突然壞結局。
+  const wouldBeGood = wonHer(t);
   if (wouldBeGood) return false; // → 呼叫端觸發（好）結局
   const units = unitsForStage(convo, stage);
   const d = ds(); if (d.seen[id]) d.seen[id][`s${stage}`] = []; // 重置該 stage 的 seen，續聊
@@ -1596,10 +1610,10 @@ function renderPursuitChat(t) {
   // 選項用「種子洗牌」打亂順序：最佳答案不再固定在第一個，玩家得真的讀完每個選項再判斷
   //（同一題順序固定、不會每次重繪就跳動；告白/鎖定那顆是特殊動作，永遠擺最後）
   let opts = seededShuffle((unit && unit.opts) || [], unit?._seed || t.id).map((o) => ({ ...o }));
-  const canConfess = aff >= 100 && tryMatch(t, s.owned);
+  const canConfess = wonHer(t);
   if (stage >= 3) {
     if (canConfess) opts.push({ label: '❤ 跟你告白：在一起吧', confess: true });
-    else opts.push({ label: '❤ 想告白…（還需更深的關係或對方看上的行頭）', locked: true });
+    else opts.push({ label: '❤ 想告白…（還需更深的關係，拜金型還得真的在她身上花夠錢）', locked: true });
   }
   const optsHtml = opts.map((o, i) => {
     let dis = '', note = '';
@@ -1635,6 +1649,9 @@ function pickChatOpt(t, opt, el) {
   if (opt.locked) return;
   const c = resolveCost(opt, t);
   if (c.amount > 0) { if (s.cash < c.amount) return; s.cash -= c.amount; if (c.isScam) d.scamAsk[t.id] = (d.scamAsk[t.id] || 0) + 1; }
+  // 記錄「真的花在她身上」的價值：現金花費照實計；送禮(gift)＝你為她亮出一件奢侈品，算一筆大手筆
+  if (c.amount > 0 && !c.isScam) d.spentOn[t.id] = (d.spentOn[t.id] || 0) + c.amount;
+  if (opt.gift && opt.gift.test(s.owned)) d.spentOn[t.id] = (d.spentOn[t.id] || 0) + GOLD_WIN_SPEND;
   // Leo・反向收割：被詐騙花掉的錢，不但全退、還倒賺一筆（你也學會割韭菜了）
   const pp = partnerPerks(d.partners || []);
   if (c.isScam && c.amount > 0 && pp.scamRefund > 0) {
